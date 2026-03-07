@@ -1,35 +1,21 @@
-const videos = document.querySelectorAll("video");
+// Lógica OIO Toc - Play/Pause Automático
+const videos = document.querySelectorAll('video');
 
-const observer = new IntersectionObserver(entries => {
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.play(); // Toca quando aparece
+        } else {
+            entry.target.pause(); // Para quando sai da tela
+        }
+    });
+}, { threshold: 0.7 }); // Só toca se 70% do vídeo aparecer
 
-entries.forEach(entry => {
-
-if(entry.isIntersecting){
-
-entry.target.play();
-
-}else{
-
-entry.target.pause();
-
-}
-
-});
-
-},{
-threshold:0.7
-});
-
-videos.forEach(video=>{
-observer.observe(video);
-});
-
-document.querySelectorAll(".like").forEach(btn=>{
-
-btn.addEventListener("click",()=>{
-
-btn.style.color="red";
-
-});
-
+videos.forEach(video => {
+    observer.observe(video);
+    // Clique para dar play/pause manual
+    video.addEventListener('click', () => {
+        if (video.paused) { video.play(); } 
+        else { video.pause(); }
+    });
 });
