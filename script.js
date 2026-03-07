@@ -1,10 +1,35 @@
-const videos = document.querySelectorAll('#video-feed video');
+const videos = document.querySelectorAll("video");
 
-// Para que só um vídeo toque por vez
-videos.forEach(v => {
-    v.addEventListener('play', () => {
-        videos.forEach(other => {
-            if(other !== v) other.pause(); // pausa os outros vídeos
-        });
-    });
+const observer = new IntersectionObserver(entries => {
+
+entries.forEach(entry => {
+
+if(entry.isIntersecting){
+
+entry.target.play();
+
+}else{
+
+entry.target.pause();
+
+}
+
+});
+
+},{
+threshold:0.7
+});
+
+videos.forEach(video=>{
+observer.observe(video);
+});
+
+document.querySelectorAll(".like").forEach(btn=>{
+
+btn.addEventListener("click",()=>{
+
+btn.style.color="red";
+
+});
+
 });
