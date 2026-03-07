@@ -1,45 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OIO Toc</title>
-
-<link rel="stylesheet" href="style.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OIO Toc</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
-<div class="feed">
-
-<div class="video-container">
-
-<video src="video1.mp4" loop></video>
-
-<div class="acoes">
-<button class="like">❤️</button>
-<button class="coment">💬</button>
-<button class="share">🔗</button>
-</div>
-
-</div>
-
-<div class="video-container">
-
-<video src="video2.mp4" loop></video>
-
-<div class="acoes">
-<button class="like">❤️</button>
-<button class="coment">💬</button>
-<button class="share">🔗</button>
-</div>
-
-</div>
-
-</div>
-
-<script src="script.js"></script>
-
+    <div class="feed">
+        <div class="video-container">
+            <video src="video1.mp4" loop onclick="this.play()"></video>
+            <div class="acoes">
+                <button class="like">❤️</button>
+                <button class="coment">💬</button>
+                <button class="share">🔗</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
