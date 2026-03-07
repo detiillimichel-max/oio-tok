@@ -1,55 +1,32 @@
-/* Design OIO Toc - Estilo TikTok */
-body, html {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #000;
-    overflow: hidden;
-    font-family: sans-serif;
-}
-
-.feed {
-    width: 100%;
-    height: 100%;
-    scroll-snap-type: y mandatory;
-    overflow-y: scroll;
-}
-
-.video-container {
-    width: 100%;
-    height: 100vh;
-    position: relative;
-    scroll-snap-align: start;
-}
-
-video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Faz o vídeo ocupar a tela toda */
-}
-
-.acoes {
+/* Salto Quântico - Barra de Miniaturas */
+.salto-quantico {
     position: absolute;
-    right: 15px;
-    bottom: 50px;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    z-index: 10;
+    gap: 10px;
+    z-index: 20;
 }
 
-.acoes button {
-    background: rgba(0, 0, 0, 0.5);
-    border: none;
-    color: white;
-    font-size: 24px;
-    padding: 10px;
-    border-radius: 50%;
+.miniatura {
+    width: 40px;
+    height: 60px;
+    border: 2px solid #fff;
+    border-radius: 5px;
+    background: #333;
     cursor: pointer;
-    transition: transform 0.2s; /* Ergonomia Dinâmica */
+    opacity: 0.6;
+    transition: 0.3s;
 }
 
-.acoes button:active {
-    transform: scale(1.2);
+.miniatura:hover {
+    opacity: 1;
+    transform: scale(1.1); /* Efeito de profundidade */
+}
+
+/* Ergonomia Dinâmica - Menu Arrastável */
+.acoes {
+    cursor: grab; /* Indica que pode ser arrastado */
 }
