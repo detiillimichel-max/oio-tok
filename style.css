@@ -1,0 +1,19 @@
+body {
+    margin: 0;
+    background: #000;
+    font-family: sans-serif;
+}
+
+#video-feed {
+    display: flex;          
+    overflow-x: auto;       
+    gap: 10px;              
+    padding: 20px;
+    scroll-behavior: smooth; 
+}
+
+#video-feed video {
+    height: 300px;          
+    border-radius: 10px;    
+    flex-shrink: 0;         
+}
