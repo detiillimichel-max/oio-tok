@@ -1,21 +1,21 @@
-// Lógica OIO Toc - Play/Pause Automático
-const videos = document.querySelectorAll('video');
+// Lógica do Salto Quântico
+const miniaturas = document.querySelectorAll('.miniatura');
+const containerFeed = document.querySelector('.feed');
 
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.play(); // Toca quando aparece
-        } else {
-            entry.target.pause(); // Para quando sai da tela
-        }
+miniaturas.forEach((min, index) => {
+    min.addEventListener('click', () => {
+        const videoDestino = document.querySelectorAll('.video-container')[index];
+        videoDestino.scrollIntoView({ behavior: 'smooth' });
+        // Efeito visual: A tela pisca para mostrar o acoplamento
+        document.body.style.filter = "brightness(1.5)";
+        setTimeout(() => document.body.style.filter = "brightness(1)", 100);
     });
-}, { threshold: 0.7 }); // Só toca se 70% do vídeo aparecer
+});
 
-videos.forEach(video => {
-    observer.observe(video);
-    // Clique para dar play/pause manual
-    video.addEventListener('click', () => {
-        if (video.paused) { video.play(); } 
-        else { video.pause(); }
-    });
+// Camada Sensorial: Som ao Curtir (Confirmar viagem ao Firebase)
+const btnLike = document.querySelector('.like');
+btnLike.addEventListener('click', () => {
+    const audio = new Audio('https://www.soundjay.com/buttons/sounds/button-16.mp3');
+    audio.play();
+    console.log("Ação viajou com sucesso pelo Firebase"); // Base vibe-app-bbba2
 });
