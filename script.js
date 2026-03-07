@@ -1,27 +1,32 @@
 // --- ESTRELA (IA) - O CÉREBRO DO OIO TOC ---
 const estrelaIA = {
-    // Acervo: Desenhos 1930, NASA e Animais
     acervo: [
         { tipo: "Desenho 1930", url: "https://archive.org/download/popeye_it_popeye_the_sailor_meets_sindbad_the_sailor/popeye_the_sailor_meets_sindbad_the_sailor_512kb.mp4" },
         { tipo: "NASA Histórica", url: "https://archive.org/download/NACA-A-Look-Back/430772main_naca_airfoils.mp4" },
         { tipo: "Documentário Animal", url: "https://www.w3schools.com/html/mov_bbb.mp4" }
     ],
 
-    // Camada Sensorial (Som e Vibração registrados por Michel)
     confirmarAcao: function() {
         new Audio('https://www.soundjay.com/buttons/sounds/button-3.mp3').play();
-        if (navigator.vibrate) navigator.vibrate(50);
+        if (navigator.vibrate) navigator.vibrate(50); // Camada Sensorial de Michel
     },
 
-    // Módulo de Acoplamento: Criar o Feed e as Miniaturas
     iniciarOioToc: function() {
         const feed = document.getElementById('feed');
+        
+        // Acoplar Barra de Monetização
+        const banner = document.createElement('div');
+        banner.className = 'container-anuncio';
+        banner.innerHTML = '<span class="texto-anuncio">PUBLICIDADE OIO TOC</span>';
+        document.body.appendChild(banner);
+
+        // Barra do Salto Quântico
         const barraSalto = document.createElement('div');
-        barraSalto.className = 'barra-salto'; // A barra lateral do Salto Quântico
+        barraSalto.className = 'barra-salto';
         document.body.appendChild(barraSalto);
 
         this.acervo.forEach((item, index) => {
-            // 1. Criar o Vídeo no Feed (Camada de 70%)
+            // Criar Vídeo (70% Mídia)
             const container = document.createElement('div');
             container.className = 'video-container';
             container.id = `video-${index}`;
@@ -35,14 +40,14 @@ const estrelaIA = {
             `;
             feed.appendChild(container);
 
-            // 2. Criar a Miniatura (Salto Quântico)
+            // Criar Miniatura (Salto Quântico)
             const miniatura = document.createElement('div');
             miniatura.className = 'miniatura-quantum';
             miniatura.innerHTML = `<video src="${item.url}" muted></video>`;
             miniatura.onclick = () => {
                 this.confirmarAcao();
                 document.getElementById(`video-${index}`).scrollIntoView({ behavior: 'smooth' });
-                // A tela pisca ao saltar (Regra OIO ONE)
+                // Módulo de Acoplamento: Piscada de tela
                 document.body.style.filter = "brightness(1.5)";
                 setTimeout(() => document.body.style.filter = "brightness(1)", 150);
             };
