@@ -1,21 +1,37 @@
 body {
-    margin: 0;
-    background: #000;
-    font-family: sans-serif;
-    display: flex;
-    justify-content: center;
+  margin: 0;
+  background: #000;
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
 }
 
 #video-feed {
-    display: flex;
-    flex-direction: column;   /* vertical */
-    gap: 10px;                /* espaço entre vídeos */
-    max-width: 400px;         /* largura do vídeo */
-    padding: 10px;
+  display: flex;
+  flex-direction: column; /* vídeos vertical */
+  gap: 10px; /* espaço entre vídeos */
+  max-width: 400px; /* largura máxima */
+  padding: 10px;
+  overflow-y: auto; /* rolagem vertical */
+  height: 100vh;
 }
 
 #video-feed video {
-    width: 100%;             /* ocupa toda a largura */
-    height: 600px;           /* altura tipo TikTok */
-    border-radius: 10px;
+  width: 100%; /* ocupa toda largura disponível */
+  height: 600px; /* altura estilo TikTok */
+  border-radius: 10px;
+}
+
+.video-meta {
+  color: #fff;
+  margin-top: 5px;
+}
+
+.video-title {
+  font-weight: bold;
+}
+
+.video-user {
+  font-size: 0.9em;
+  opacity: 0.8;
 }
