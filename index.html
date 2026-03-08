@@ -2,22 +2,76 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OIO Toc</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OIO ONE - Identidade</title>
+    <style>
+        /* Camada de Identidade e Profundidade */
+        body { margin: 0; background: #000; color: white; overflow: hidden; font-family: sans-serif; }
+        
+        #user-base {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center; z-index: 1;
+        }
+
+        .profile-img {
+            width: 140px; height: 140px; border-radius: 50%;
+            border: 3px solid #fff; box-shadow: 0 0 40px rgba(255,255,255,0.3);
+            background: #222; /* Espaço para sua foto */
+        }
+
+        /* Ergonomia Dinâmica: Gaveta de Vidro (30%) */
+        #glass-drawer {
+            position: fixed; bottom: -75%; left: 0;
+            width: 100%; height: 85%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 40px 40px 0 0;
+            transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 10; border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .handle { width: 50px; height: 5px; background: #fff; margin: 15px auto; border-radius: 5px; }
+        
+        /* Módulos de Acoplamento: Efeito Piscar */
+        @keyframes pulse { 50% { background: #00ffcc; opacity: 0.6; } }
+        .dock-flash { animation: pulse 0.4s ease; }
+    </style>
 </head>
 <body>
-    <div class="feed">
-        <div class="video-container">
-            <video src="video1.mp4" loop onclick="this.play()"></video>
-            <div class="acoes">
-                <button class="like">❤️</button>
-                <button class="coment">💬</button>
-                <button class="share">🔗</button>
-            </div>
+
+    <div id="user-base">
+        <div class="profile-img"></div>
+        <h1>Michel</h1>
+        <p>OIO ONE - User Core</p>
+    </div>
+
+    <div id="glass-drawer">
+        <div class="handle"></div>
+        <div style="padding: 30px; display: flex; gap: 20px; justify-content: center;">
+            <div onclick="dockApp(this)" style="padding: 20px; background: rgba(0,0,0,0.5); border-radius: 15px;">VIBE</div>
+            <div onclick="dockApp(this)" style="padding: 20px; background: rgba(0,0,0,0.5); border-radius: 15px;">ESTRELA</div>
         </div>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        // Código de Movimento: Captura de Gestos
+        let startY;
+        const drawer = document.getElementById('glass-drawer');
+
+        document.addEventListener('touchstart', e => startY = e.touches[0].clientY);
+        document.addEventListener('touchmove', e => {
+            let diff = startY - e.touches[0].clientY;
+            if (diff > 100) drawer.style.transform = 'translateY(-85%)'; // Sobe
+            if (diff < -100) drawer.style.transform = 'translateY(0)';   // Desce
+        });
+
+        // Feedback de Acoplamento
+        function dockApp(el) {
+            el.classList.add('dock-flash');
+            setTimeout(() => el.classList.remove('dock-flash'), 400);
+            if(navigator.vibrate) navigator.vibrate(50); // Camada Sensorial
+        }
+    </script>
 </body>
 </html>
-
