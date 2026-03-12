@@ -3,28 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OIO TOC - FINAL</title>
+    <title>OIO TOC - COMUNIDADE</title>
     <style>
-        body, html { margin:0; padding:0; background:#000; height:100%; overflow:hidden; width:100%; font-family: sans-serif; }
+        :root { --accent: #00e5ff; }
+        body, html { margin:0; padding:0; background:#000; height:100%; overflow:hidden; position:fixed; width:100%; font-family: sans-serif; }
+        
         #vibePlayer { position:absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: 1; }
-        .hud { position:absolute; inset:0; z-index:10; padding:30px; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none; }
-        .side { position:absolute; right:20px; bottom:100px; display:flex; flex-direction:column; gap:20px; pointer-events:auto; }
-        .btn { background:rgba(30,30,30,0.9); border:1px solid #00e5ff; width:60px; height:60px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#00e5ff; cursor:pointer; font-size: 24px; }
+
+        .hud { position:absolute; inset:0; z-index:10; padding:30px; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none; background: linear-gradient(0deg, rgba(0,0,0,0.4) 0%, transparent 40%); }
+        
+        /* MENU LATERAL ERGONÔMICO */
+        .side { position:absolute; right:20px; bottom:100px; display:flex; flex-direction:column; gap:25px; pointer-events:auto; }
+        
+        .btn { background:rgba(20,20,20,0.85); border:1px solid rgba(255,255,255,0.1); width:60px; height:60px; border-radius:15px; display:flex; align-items:center; justify-content:center; color:#fff; cursor:pointer; backdrop-filter: blur(10px); transition: 0.3s; }
+        .btn-plus { background: var(--accent); color: #000; border: none; font-size: 30px; font-weight: bold; box-shadow: 0 0 20px rgba(0, 229, 255, 0.4); }
+        .btn:active { transform: scale(0.9); border-color: var(--accent); }
+
+        /* INDICADOR DE UPLOAD */
+        #uploadStatus { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #000; padding: 5px 15px; border-radius: 20px; font-size: 10px; font-weight: bold; display: none; z-index: 100; }
     </style>
 </head>
-<body onclick="document.getElementById('vibePlayer').play()">
+<body>
 
-    <video id="vibePlayer" loop playsinline autoplay muted>
-        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-    </video>
+    <div id="uploadStatus">ENVIANDO NOVA VIBE...</div>
+
+    <video id="vibePlayer" loop playsinline muted autoplay src="https://assets.mixkit.co/videos/preview/mixkit-abstract-cube-network-connection-4432-large.mp4"></video>
 
     <div class="hud">
-        <div style="color:#00e5ff; font-weight:bold;">OIO_SYSTEM // MICHEL</div>
+        <div style="color:var(--accent); font-weight:bold; letter-spacing: 1.5px; text-shadow: 0 0 10px rgba(0,0,0,0.8);">OIO_SYSTEM // MICHEL</div>
+        
         <div class="side">
-            <button class="btn" onclick="alert('Salto Quântico!')">🔄</button>
-            <button class="btn" onclick="navigator.share({url: window.location.href})">🔗</button>
+            <label class="btn btn-plus">
+                +
+                <input type="file" accept="video/*" style="display:none" onchange="uploadVibe(this)">
+            </label>
+
+            <button class="btn" onclick="proximaVibe()">🔄</button>
+            
+            <button class="btn" onclick="enviar()">🔗</button>
         </div>
     </div>
 
+    <script>
+        const video = document.getElementById('vibePlayer');
+        const status = document.getElementById('uploadStatus');
+
+        // Essa função simula o "despejo" da galeria para o app
+        function uploadVibe(input) {
+            const file = input.files[0];
+            if (file) {
+                status.style.display = 'block';
+                
+                // Cria um link temporário para mostrar o vídeo na hora
+                const blobURL = URL.createObjectURL(file);
+                
+                setTimeout(() => {
+                    video.src = blobURL;
+                    video.play();
+                    status.innerText = "VIBE PUBLICADA!";
+                    if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                    
+                    setTimeout(() => status.style.display = 'none', 3000);
+                }, 2000); // Simula o tempo de viagem pro Firebase
+            }
+        }
+
+        function proximaVibe() {
+            // Aqui ele voltaria a puxar os vídeos globais do banco
+            if(navigator.vibrate) navigator.vibrate(40);
+        }
+
+        function enviar() {
+            if(navigator.share) {
+                navigator.share({ title: 'OIO TOC', text: 'Veja esta Vibe no OIO ONE', url: window.location.href });
+            }
+        }
+
+        document.body.onclick = () => { video.muted = false; video.play(); };
+    </script>
 </body>
 </html>
+
