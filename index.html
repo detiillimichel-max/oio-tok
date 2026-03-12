@@ -3,104 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OIO TOC</title>
+    <title>OIO TOC - RADAR</title>
     <style>
-        :root { --accent: #00e5ff; --glass: rgba(255, 255, 255, 0.1); }
+        :root { --accent: #00e5ff; }
         * { margin:0; padding:0; box-sizing: border-box; }
-        body, html { background:#000; height:100vh; width:100vw; overflow:hidden; position:fixed; font-family: 'Inter', sans-serif; }
-        
-        /* PLAYER MASTER */
-        #vibePlayer { position:absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: 1; }
-
-        /* HUD MINIMALISTA */
-        .hud { position:absolute; inset:0; z-index:10; pointer-events:none; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; }
-        
-        .side-actions { position: absolute; right: 15px; bottom: 40px; display: flex; flex-direction: column; gap: 20px; pointer-events: auto; }
-
-        /* BOTÃO POSTAR (GHOST DESIGN) */
-        .btn-main { 
-            width: 55px; height: 55px; border-radius: 50%; border: none;
-            background: var(--accent); color: #000; font-size: 28px; font-weight: bold;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4); cursor: pointer;
-        }
-
-        .btn-circle {
-            width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--glass);
-            background: rgba(0,0,0,0.4); color: #fff; display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(10px); cursor: pointer; font-size: 18px;
-        }
-
-        /* ICONE DE PAUSA (APARECE NO MEIO) */
-        #pauseIcon { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 60px; color: rgba(255,255,255,0.5); display: none; z-index: 5;
-        }
+        body, html { background:#000; height:100vh; width:100vw; overflow:hidden; position:fixed; font-family: sans-serif; }
+        video, iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:none; z-index: 1; object-fit: cover; }
+        .hud { position:absolute; inset:0; z-index:10; pointer-events:none; display:flex; flex-direction:column; justify-content:flex-end; padding:25px; }
+        .side { position:absolute; right:20px; bottom:50px; display:flex; flex-direction:column; gap:20px; pointer-events:auto; }
+        .btn-add { width:60px; height:60px; border-radius:50%; background:var(--accent); color:#000; font-size:30px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow: 0 0 20px rgba(0,229,255,0.4); border:none; }
     </style>
 </head>
-<body onclick="togglePlay()">
+<body onclick="document.getElementById('v').play()">
 
-    <div id="pauseIcon">||</div>
-    <video id="vibePlayer" playsinline loop></video>
+    <video id="v" loop playsinline autoplay></video>
 
     <div class="hud">
-        <div class="side-actions">
-            <label class="btn-main">
-                +
-                <input type="file" accept="video/*" multiple style="display:none" onchange="handleFiles(this)">
-            </label>
-            
-            <button class="btn-circle" onclick="event.stopPropagation(); nextVibe()">❯</button>
-            
-            <button class="btn-circle" onclick="event.stopPropagation(); share()">🔗</button>
+        <div class="side">
+            <button class="btn-add" onclick="enviarVibe()">+</button>
         </div>
     </div>
 
-    <script>
-        const player = document.getElementById('vibePlayer');
-        const pauseIcon = document.getElementById('pauseIcon');
-        let vibes = [];
-        let current = 0;
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, onValue, limitToLast, query } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        function handleFiles(input) {
-            const files = Array.from(input.files);
-            files.forEach(file => {
-                const url = URL.createObjectURL(file);
-                vibes.push(url);
-            });
-            if (vibes.length > 0 && !player.src) playVibe(0);
-        }
+        const firebaseConfig = {
+            apiKey: "AIzaSyBG3oBoBvOwySN64gR6CgCcXTo2DG-av60",
+            authDomain: "vibe-app-bbba2.firebaseapp.com",
+            databaseURL: "https://vibe-app-bbba2-default-rtdb.firebaseio.com",
+            projectId: "vibe-app-bbba2",
+            storageBucket: "vibe-app-bbba2.firebasestorage.app",
+            messagingSenderId: "329513213082",
+            appId: "1:329513213082:web:126282d75eb61419a05323"
+        };
 
-        function playVibe(idx) {
-            player.src = vibes[idx];
-            player.muted = false;
-            player.play();
-            current = idx;
-        }
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const dbRef = ref(db, 'vibes_compartilhadas');
 
-        function nextVibe() {
-            if (vibes.length > 0) {
-                current = (current + 1) % vibes.length;
-                playVibe(current);
+        const video = document.getElementById('v');
+
+        // RADAR: Escuta o banco de dados
+        onValue(query(dbRef, limitToLast(1)), (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                const links = Object.values(data);
+                const ultimoLink = links[links.length - 1];
+                video.src = ultimoLink;
+                video.play();
             }
-        }
+        });
 
-        // FUNÇÃO DE PAUSA/PLAY NO TOQUE
-        function togglePlay() {
-            if (!player.src) return;
-            if (player.paused) {
-                player.play();
-                pauseIcon.style.display = 'none';
-            } else {
-                player.pause();
-                pauseIcon.style.display = 'block';
-                setTimeout(() => { if(!player.paused) pauseIcon.style.display = 'none'; }, 500);
+        // FUNÇÃO PARA ENVIAR LINK PARA TODOS OS CELULARES
+        window.enviarVibe = () => {
+            const link = prompt("Cole aqui o link do vídeo (MP4 direto):");
+            if (link) {
+                push(dbRef, link);
+                alert("Vibe enviada para todos os celulares!");
             }
-        }
-
-        function share() {
-            if(navigator.share) navigator.share({ title: 'OIO TOC', url: window.location.href });
-        }
+        };
     </script>
 </body>
 </html>
