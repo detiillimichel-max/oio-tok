@@ -1,100 +1,51 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OIO TOC - EXECUTIVE</title>
-    <style>
-        :root { --accent: #00e5ff; --bg: #000; --panel: rgba(20, 20, 20, 0.8); }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        
-        body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; }
+<div class="viewport">
+    <div id="player" style="width:100%; height:100%; pointer-events: none;"></div>
+    
+    <div class="hud"> ... </div>
+</div>
 
-        /* Camada de Mídia */
-        .video-viewport { width: 100vw; height: 100vh; position: relative; display: flex; align-items: center; justify-content: center; }
-        video { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.9); }
-
-        /* HUD - Interface Profissional */
-        .hud-overlay { position: absolute; inset: 0; pointer-events: none; border: 1px solid rgba(255,255,255,0.05); }
-        
-        .info-panel { position: absolute; bottom: 50px; left: 25px; pointer-events: auto; }
-        .id-badge { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-        .id-avatar { width: 40px; height: 40px; background: linear-gradient(45deg, #111, #333); border: 1px solid var(--accent); border-radius: 4px; }
-        .id-text { font-size: 0.9rem; letter-spacing: 1px; color: var(--accent); font-weight: 700; text-transform: uppercase; }
-
-        /* Painel de Comandos Lateral (Ícones Profissionais) */
-        .command-center { position: absolute; right: 20px; bottom: 120px; display: flex; flex-direction: column; gap: 30px; pointer-events: auto; }
-        
-        .cmd-btn { background: none; border: none; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; transition: 0.2s; }
-        
-        /* Ícone: Conexão/Sincronização (Substitui Coração) */
-        .btn-box { width: 50px; height: 50px; border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; background: var(--panel); backdrop-filter: blur(5px); }
-        .btn-box svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; }
-        
-        .cmd-label { font-size: 10px; margin-top: 8px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1px; }
-
-        /* Barra de Sincronia (Progresso) */
-        .sync-bar { position: absolute; bottom: 0; left: 0; height: 2px; background: var(--accent); width: 0%; box-shadow: 0 0 15px var(--accent); }
-    </style>
-</head>
-<body>
-
-    <div class="video-viewport">
-        <video id="mainVideo" loop playsinline src="https://assets.mixkit.co/videos/preview/mixkit-stars-in-the-night-sky-out-of-focus-9004-large.mp4"></video>
-        
-        <div class="hud-overlay">
-            <div class="info-panel">
-                <div class="id-badge">
-                    <div class="id-avatar"></div>
-                    <span class="id-text">OIO_USER_AUTH: MICHEL</span>
-                </div>
-                <p style="font-size: 12px; color: #888;">STATUS: LIVE_STREAM // DATA_LINK: ACTIVE</p>
-            </div>
-
-            <div class="command-center">
-                <button class="cmd-btn" onclick="vibrateActive(this)">
-                    <div class="btn-box">
-                        <svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
-                    </div>
-                    <span class="cmd-label">SYNC</span>
-                </button>
-
-                <button class="cmd-btn" onclick="shareSystem()">
-                    <div class="btn-box">
-                        <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"></path></svg>
-                    </div>
-                    <span class="cmd-label">SEND</span>
-                </button>
-            </div>
-        </div>
-        <div class="sync-bar" id="syncBar"></div>
-    </div>
-
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
-    const v = document.getElementById('mainVideo');
-    const bar = document.getElementById('syncBar');
+    let ytPlayer;
 
-    // Desbloqueio Sensorial por Toque
-    document.body.addEventListener('click', () => {
-        if(v.paused) { v.play(); v.muted = false; }
-    }, {once: false});
-
-    v.ontimeupdate = () => {
-        bar.style.width = (v.currentTime / v.duration) * 100 + "%";
-    };
-
-    function vibrateActive(el) {
-        if(navigator.vibrate) navigator.vibrate(40);
-        el.querySelector('.btn-box').style.borderColor = "#00e5ff";
-        el.querySelector('.btn-box').style.boxShadow = "0 0 15px #00e5ff";
+    // 1. O GATILHO: Carrega o player assim que a API estiver pronta
+    function onYouTubeIframeAPIReady() {
+        ytPlayer = new YT.Player('player', {
+            height: '100%',
+            width: '100%',
+            videoId: 'dQw4w9WgXcQ', // Vídeo inicial
+            playerVars: {
+                'autoplay': 1,
+                'controls': 0,
+                'loop': 1,
+                'modestbranding': 1,
+                'playlist': 'dQw4w9WgXcQ' // Para o loop funcionar
+            },
+            events: { 'onReady': onPlayerReady }
+        });
     }
 
-    function shareSystem() {
-        if (navigator.share) {
-            navigator.share({ title: 'OIO ONE DATA', url: window.location.href });
+    function onPlayerReady(event) {
+        event.target.mute(); // Começa mudo para o Chrome não bloquear
+        event.target.playVideo();
+    }
+
+    // 2. INTERAÇÃO SENSORIAL: Toca ao clicar em qualquer lugar
+    document.body.addEventListener('click', () => {
+        if(ytPlayer) {
+            ytPlayer.unMute();
+            ytPlayer.playVideo();
         }
+    });
+
+    // 3. SALTO QUÂNTICO (Troca de vídeo ao clicar em SYNC)
+    function triggerSync(el) {
+        if(navigator.vibrate) navigator.vibrate(50);
+        
+        // Lista de vídeos de domínio público/belos para o OIO TOC
+        const vibes = ['-FlxM_0S2lA', 'LsqvAUEis_M', '9d8wWcJLnFI'];
+        const randomVibe = vibes[Math.floor(Math.random() * vibes.length)];
+        
+        ytPlayer.loadVideoById(randomVibe);
     }
 </script>
-</body> 
-</html>
-
