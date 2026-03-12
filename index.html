@@ -3,55 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OIO TOC</title>
+    <title>OIO TOC - FINAL</title>
     <style>
         body, html { margin:0; padding:0; background:#000; height:100%; overflow:hidden; width:100%; font-family: sans-serif; }
-        
-        /* Fundo sempre preto para não dar flash branco */
-        #vibePlayer { 
-            position:absolute; top:0; left:0; width:100%; height:100%; 
-            object-fit: cover; z-index: 1; background: #000;
-        }
-
+        #vibePlayer { position:absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: 1; }
         .hud { position:absolute; inset:0; z-index:10; padding:30px; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none; }
         .side { position:absolute; right:20px; bottom:100px; display:flex; flex-direction:column; gap:20px; pointer-events:auto; }
-        .btn { background:rgba(30,30,30,0.9); border:1px solid rgba(0,229,255,0.3); width:60px; height:60px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#00e5ff; cursor:pointer; font-size: 24px; }
+        .btn { background:rgba(30,30,30,0.9); border:1px solid #00e5ff; width:60px; height:60px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#00e5ff; cursor:pointer; font-size: 24px; }
     </style>
 </head>
-<body onclick="forcePlay()">
+<body onclick="document.getElementById('vibePlayer').play()">
 
-    <video id="vibePlayer" loop playsinline muted autoplay poster="https://via.placeholder.com/1080x1920/000000/00e5ff?text=CARREGANDO+VIBE...">
-        <source src="https://v.ftcdn.net/05/17/37/90/700_F_517379053_8Vp48nC9l7Xm6T7O9G4xR5j7I9k1L6kS_ST.mp4" type="video/mp4">
+    <video id="vibePlayer" loop playsinline autoplay muted>
+        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
     </video>
 
     <div class="hud">
-        <div style="color:#00e5ff; font-weight:bold; letter-spacing: 1px;">OIO_SYSTEM // MICHEL</div>
-        
+        <div style="color:#00e5ff; font-weight:bold;">OIO_SYSTEM // MICHEL</div>
         <div class="side">
-            <button class="btn" onclick="proxima()">🔄</button>
-            <button class="btn" onclick="enviar()">🔗</button>
+            <button class="btn" onclick="alert('Salto Quântico!')">🔄</button>
+            <button class="btn" onclick="navigator.share({url: window.location.href})">🔗</button>
         </div>
     </div>
 
-    <script>
-        const v = document.getElementById('vibePlayer');
-
-        // Função que força o vídeo a tocar no primeiro clique na tela
-        function forcePlay() {
-            v.muted = false;
-            v.play().catch(e => console.log("Aguardando interação..."));
-        }
-
-        function proxima() {
-            // Vídeo de tecnologia futurista (Leve)
-            v.src = "https://v.ftcdn.net/02/94/54/10/700_F_294541075_9G6GzR8O2I9I3z7N8G4xR5j7I9k1L6kS_ST.mp4";
-            v.play();
-            if(navigator.vibrate) navigator.vibrate(50);
-        }
-
-        function enviar() {
-            if(navigator.share) navigator.share({ title: 'OIO ONE', url: window.location.href });
-        }
-    </script>
 </body>
 </html>
