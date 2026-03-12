@@ -3,105 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OIO TOC - MASTER</title>
+    <title>OIO TOC</title>
     <style>
-        :root { --accent: #00e5ff; --bg: #000; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
-        body, html { background: #000; height: 100%; width: 100%; overflow: hidden; position: fixed; }
+        :root { --accent: #00e5ff; }
+        body, html { margin:0; padding:0; background:#000; height:100%; overflow:hidden; position:fixed; width:100%; }
+        
+        /* O segredo para o YouTube ocupar tudo */
+        .video-wrapper { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+        iframe { width:100%; height:100%; border:none; transform:scale(1.5); }
 
-        /* PLAYER YOUTUBE EM TELA CHEIA */
-        .video-background {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; /* Deixa os cliques passarem para os seus botões */
-        }
-        #ytPlayer { width: 100%; height: 100%; border: none; transform: scale(1.5); /* Remove bordas pretas */ }
-
-        /* INTERFACE HUD */
-        .hud-layer {
-            position: absolute; inset: 0;
-            display: flex; flex-direction: column; justify-content: space-between;
-            padding: 30px; z-index: 10;
-            background: linear-gradient(0deg, rgba(0,0,0,0.6) 0%, transparent 50%);
-            pointer-events: none;
-        }
-
-        .user-info { display: flex; align-items: center; gap: 12px; pointer-events: auto; }
-        .avatar-box { width: 45px; height: 45px; border: 2px solid var(--accent); border-radius: 8px; background: #111; }
-        .user-text { color: var(--accent); font-weight: bold; font-size: 13px; letter-spacing: 1px; }
-
-        .side-controls {
-            position: absolute; right: 20px; bottom: 100px;
-            display: flex; flex-direction: column; gap: 30px; pointer-events: auto;
-        }
-        .btn-pro {
-            background: rgba(20,20,20,0.8); border: 1px solid rgba(255,255,255,0.1);
-            width: 55px; height: 55px; border-radius: 12px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: #fff; cursor: pointer; backdrop-filter: blur(10px);
-        }
-        .btn-pro svg { width: 24px; height: 24px; margin-bottom: 4px; }
-        .btn-pro span { font-size: 9px; font-weight: bold; color: #888; }
-
-        .btn-pro:active { border-color: var(--accent); transform: scale(0.9); }
-
-        .progress-line { position: absolute; bottom: 0; left: 0; height: 3px; background: var(--accent); width: 0%; box-shadow: 0 0 10px var(--accent); }
+        /* Sua Interface Profissional */
+        .hud { position:absolute; inset:0; z-index:10; padding:30px; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none; }
+        .side { position:absolute; right:20px; bottom:100px; display:flex; flex-direction:column; gap:20px; pointer-events:auto; }
+        .btn { background:rgba(20,20,20,0.8); border:1px solid rgba(255,255,255,0.1); width:60px; height:60px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff; cursor:pointer; }
     </style>
 </head>
 <body>
 
-    <div class="video-background">
-        <div id="ytPlayer"></div>
+    <div class="video-wrapper">
+        <div id="display"></div>
     </div>
 
-    <div class="hud-layer">
-        <div class="user-info">
-            <div class="avatar-box"></div>
-            <div class="user-text">OIO_SYSTEM // MICHEL</div>
-        </div>
-
-        <div class="side-controls">
-            <button class="btn-pro" onclick="nextVibe()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path></svg>
-                <span>SYNC</span>
-            </button>
-            <button class="btn-pro" onclick="shareApp()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"></path></svg>
-                <span>SEND</span>
-            </button>
+    <div class="hud">
+        <div style="color:var(--accent); font-weight:bold; pointer-events:auto;">OIO_SYSTEM // MICHEL</div>
+        <div class="side">
+            <button class="btn" onclick="proximo()">🔄</button>
+            <button class="btn" onclick="compartilhar()">🔗</button>
         </div>
     </div>
-
-    <div class="progress-line" id="line"></div>
 
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
         let player;
-        const videoList = ['LsqvAUEis_M', '9d8wWcJLnFI', '36YnV9STBqc']; // IDs de vídeos de tecnologia/espaço
+        const lista = ['LsqvAUEis_M', '9d8wWcJLnFI', '36YnV9STBqc'];
 
         function onYouTubeIframeAPIReady() {
-            player = new YT.Player('ytPlayer', {
-                videoId: videoList[0],
-                playerVars: { 'autoplay': 1, 'controls': 0, 'modestbranding': 1, 'loop': 1, 'playlist': videoList[0] },
+            player = new YT.Player('display', { // Nome ajustado para "display"
+                videoId: lista[0],
+                playerVars: { 'autoplay': 1, 'controls': 0, 'modestbranding': 1, 'loop': 1, 'playlist': lista[0] },
                 events: { 'onReady': (e) => { e.target.mute(); e.target.playVideo(); } }
             });
         }
 
-        // Destrava som ao tocar em qualquer lugar
         document.body.onclick = () => { if(player) { player.unMute(); player.playVideo(); } };
 
-        function nextVibe() {
-            const id = videoList[Math.floor(Math.random() * videoList.length)];
-            player.loadVideoById(id);
+        function proximo() {
+            const novoId = lista[Math.floor(Math.random() * lista.length)];
+            player.loadVideoById(novoId);
             if(navigator.vibrate) navigator.vibrate(40);
         }
 
-        function shareApp() {
+        function compartilhar() {
             if(navigator.share) navigator.share({ title: 'OIO ONE', url: window.location.href });
         }
-
-        // Barra de progresso fictícia para manter o visual
-        let p = 0;
-        setInterval(() => { p = (p + 0.5) % 100; document.getElementById('line').style.width = p + "%"; }, 100);
     </script>
 </body>
 </html>
