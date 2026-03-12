@@ -3,58 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OIO TOC</title>
+    <title>OIO TOC - MASTER</title>
     <style>
         :root { --accent: #00e5ff; }
-        body, html { margin:0; padding:0; background:#000; height:100%; overflow:hidden; position:fixed; width:100%; }
+        body, html { margin:0; padding:0; background:#000; height:100%; overflow:hidden; position:fixed; width:100%; font-family: sans-serif; }
         
-        /* O segredo para o YouTube ocupar tudo */
-        .video-wrapper { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
-        iframe { width:100%; height:100%; border:none; transform:scale(1.5); }
+        /* PLAYER DE VÍDEO DIRETO (O que o usuário vê) */
+        #vibePlayer { position:absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: 1; }
 
-        /* Sua Interface Profissional */
-        .hud { position:absolute; inset:0; z-index:10; padding:30px; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none; }
+        /* INTERFACE (O que fica por cima) */
+        .hud { position:absolute; inset:0; z-index:10; padding:30px; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none; background: linear-gradient(0deg, rgba(0,0,0,0.5) 0%, transparent 40%); }
         .side { position:absolute; right:20px; bottom:100px; display:flex; flex-direction:column; gap:20px; pointer-events:auto; }
-        .btn { background:rgba(20,20,20,0.8); border:1px solid rgba(255,255,255,0.1); width:60px; height:60px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff; cursor:pointer; }
+        .btn { background:rgba(20,20,20,0.8); border:1px solid rgba(255,255,255,0.1); width:60px; height:60px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff; cursor:pointer; backdrop-filter: blur(10px); }
+        .btn:active { border-color: var(--accent); transform: scale(0.9); }
     </style>
 </head>
 <body>
 
-    <div class="video-wrapper">
-        <div id="display"></div>
-    </div>
+    <video id="vibePlayer" loop playsinline muted autoplay src="https://assets.mixkit.co/videos/preview/mixkit-abstract-cube-network-connection-4432-large.mp4"></video>
 
     <div class="hud">
-        <div style="color:var(--accent); font-weight:bold; pointer-events:auto;">OIO_SYSTEM // MICHEL</div>
+        <div style="color:var(--accent); font-weight:bold; pointer-events:auto; letter-spacing: 1.5px;">OIO_SYSTEM // MICHEL</div>
+        
         <div class="side">
-            <button class="btn" onclick="proximo()">🔄</button>
-            <button class="btn" onclick="compartilhar()">🔗</button>
+            <button class="btn" onclick="proximaVibe()">🔄</button>
+            <button class="btn" onclick="enviar()">🔗</button>
         </div>
     </div>
 
-    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
-        let player;
-        const lista = ['LsqvAUEis_M', '9d8wWcJLnFI', '36YnV9STBqc'];
+        const video = document.getElementById('vibePlayer');
+        
+        // Aqui é onde você coloca os seus vídeos no futuro
+        const lista = [
+            'https://assets.mixkit.co/videos/preview/mixkit-abstract-cube-network-connection-4432-large.mp4',
+            'https://assets.mixkit.co/videos/preview/mixkit-blue-and-white-abstract-gradient-background-23425-large.mp4'
+        ];
 
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('display', { // Nome ajustado para "display"
-                videoId: lista[0],
-                playerVars: { 'autoplay': 1, 'controls': 0, 'modestbranding': 1, 'loop': 1, 'playlist': lista[0] },
-                events: { 'onReady': (e) => { e.target.mute(); e.target.playVideo(); } }
-            });
-        }
+        let index = 0;
 
-        document.body.onclick = () => { if(player) { player.unMute(); player.playVideo(); } };
+        // Ativa o som no primeiro toque do usuário
+        document.body.onclick = () => { 
+            video.muted = false; 
+            video.play();
+        };
 
-        function proximo() {
-            const novoId = lista[Math.floor(Math.random() * lista.length)];
-            player.loadVideoById(novoId);
+        function proximaVibe() {
+            index = (index + 1) % lista.length;
+            video.src = lista[index];
+            video.play();
             if(navigator.vibrate) navigator.vibrate(40);
         }
 
-        function compartilhar() {
-            if(navigator.share) navigator.share({ title: 'OIO ONE', url: window.location.href });
+        function enviar() {
+            if(navigator.share) {
+                navigator.share({ title: 'OIO ONE', url: window.location.href });
+            }
         }
     </script>
 </body>
