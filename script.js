@@ -1,8 +1,8 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
     let player;
-    // LISTA DE VÍDEOS LIBERADOS PELO YOUTUBE
-    const lista = ['jNQXAC9IVRw', 'hT_nvWreI6o', '9fkSHe6IAn4', '36YnV9STBqc'];
+    // LISTA DE VÍDEOS 100% LIBERADOS
+    const lista = ['hT_nvWreI6o', '9fkSHe6IAn4', '36YnV9STBqc', '7X8m6SHe52I'];
 
     function onYouTubeIframeAPIReady() {
         player = new YT.Player('display', {
@@ -13,8 +13,7 @@
                 'modestbranding': 1, 
                 'loop': 1, 
                 'playlist': lista[0],
-                'rel': 0,
-                'showinfo': 0
+                'origin': window.location.origin
             },
             events: { 
                 'onReady': (e) => { 
@@ -25,7 +24,7 @@
         });
     }
 
-    // DESTRAVA O SOM E O VÍDEO NO PRIMEIRO TOQUE
+    // AO CLICAR NA TELA, O VÍDEO DESTREVA
     document.body.onclick = () => { 
         if(player && player.unMute) { 
             player.unMute(); 
@@ -41,10 +40,7 @@
 
     function compartilhar() {
         if(navigator.share) {
-            navigator.share({ 
-                title: 'OIO ONE', 
-                url: window.location.href 
-            });
+            navigator.share({ title: 'OIO ONE', url: window.location.href });
         }
     }
 </script>
