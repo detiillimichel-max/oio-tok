@@ -166,7 +166,112 @@
             // const sRef = ref(storage, 'vibes/' + file.name);
             // await uploadBytes(sRef, file);
         }
-        */
+        /* --- COMANDO DO SALTO QUÂNTICO (OIO ONE) --- */
+function showPage(pageId) {
+    // 1. Fecha todas as telas e tira o brilho
+    document.querySelectorAll('section').forEach(section => {
+        section.classList.remove('active');
+        section.classList.remove('acoplado');
+    });
+
+    // 2. Localiza a tela que você quer abrir
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) {
+        // 3. Ativa a tela (O CSS faz ela 'saltar' do fundo)
+        targetPage.classList.add('active');
+        
+        // 4. Faz a tela piscar (Módulo de Acoplamento)
+        setTimeout(() => {
+            targetPage.classList.add('acoplado');
+        }, 50);
+
+        // 5. Vibração Sensorial (DNA Michel Detilli)
+        if (navigator.vibrate) {
+            navigator.vibrate(20); 
+        }
+    }
+
+    // 6. Deixa o botão do menu aceso na cor certa
+    document.querySelectorAll('.bottom-nav button').forEach(btn => {
+        btn.classList.remove('active');
+        // Se o botão tiver o comando para abrir essa página, ele acende
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(pageId)) {
+            btn.classList.add('active');
+        }
+    });
+}/* --- SENSOR DE GESTOS OIO ONE --- */
+let touchstartY = 0;
+let touchendY = 0;
+
+// Captura onde o toque começa
+document.addEventListener('touchstart', e => {
+    touchstartY = e.changedTouches[0].screenY;
+}, false);
+
+// Captura onde o toque termina e decide a ação
+document.addEventListener('touchend', e => {
+    touchendY = e.changedTouches[0].screenY;
+    handleGesture();
+}, false);
+
+function handleGesture() {
+    const deslizeMinimo = 50; // Sensibilidade do toque
+
+    // Se deslizou para CIMA (abre o chat)
+    if (touchendY < touchstartY - deslizeMinimo) {
+        console.log("Deslizou para cima: Abrindo Chat");
+        showPage('chat'); // Use o ID real da sua section de chat
+    }
+
+    // Se deslizou para BAIXO (abre os vídeos)
+    if (touchendY > touchstartY + deslizeMinimo) {
+        console.log("Deslizou para baixo: Abrindo Vídeos");
+        showPage('videos'); // Use o ID real da sua section de vídeos
+    }
+}
+        /* --- MENU EXPLOSIVO OIO ONE --- */
+// 1. Cria o HTML do Menu dinamicamente para você não ter que subir o código
+const menuHTML = `
+<div id="menu-explosivo" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); z-index:999; justify-content:center; align-items:center;">
+    <div id="apps-container" style="position:relative; width:300px; height:300px; display:flex; justify-content:center; align-items:center;">
+        <div class="app-icon" onclick="showPage('chat')" style="position:absolute; transition:all 0.5s; transform:scale(0);">💬<br>Vibe</div>
+        <div class="app-icon" onclick="window.location.href='https://google.com'" style="position:absolute; transition:all 0.5s; transform:scale(0);">🔍<br>Google</div>
+        <div class="app-icon" onclick="window.location.href='https://youtube.com'" style="position:absolute; transition:all 0.5s; transform:scale(0);">📺<br>YouTube</div>
+        <div class="app-icon" onclick="showPage('videos')" style="position:absolute; transition:all 0.5s; transform:scale(0);">🎬<br>Vídeos</div>
+    </div>
+</div>`;
+document.body.insertAdjacentHTML('beforeend', menuHTML);
+
+// 2. Função que faz a EXPLOSÃO
+function toggleMenuPlus() {
+    const menu = document.getElementById('menu-explosivo');
+    const icons = document.querySelectorAll('.app-icon');
+    
+    if (menu.style.display === 'none') {
+        menu.style.display = 'flex';
+        // Ângulos para a explosão circular
+        const posicoes = [[0,-100], [100,0], [0,100], [-100,0]]; 
+        
+        setTimeout(() => {
+            icons.forEach((icon, i) => {
+                icon.style.transform = `translate(${posicoes[i][0]}px, ${posicoes[i][1]}px) scale(1.2)`;
+                icon.style.background = 'var(--glass)';
+                icon.style.padding = '15px';
+                icon.style.borderRadius = '15px';
+                icon.style.textAlign = 'center';
+            });
+        }, 50);
+    } else {
+        icons.forEach(icon => icon.style.transform = 'scale(0)');
+        setTimeout(() => menu.style.display = 'none', 500);
+    }
+}
+
+// 3. Conecta com o seu botão "+"
+// Procura o botão que tem o símbolo de "+" e adiciona o clique
+document.querySelector('button:has(svg), .btn-plus, #addBtn').onclick = toggleMenuPlus;
+        
+        
     </script>
 </body>
 </html>
