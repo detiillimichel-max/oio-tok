@@ -3,24 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OIO ONE - CONEXÃO REAL</title>
+    <title>OIO ONE - TOUCH</title>
     <style>
         :root { --accent: #00e5ff; }
         * { margin:0; padding:0; box-sizing: border-box; }
         body, html { background:#000; height:100vh; width:100vw; overflow:hidden; position:fixed; font-family: sans-serif; }
+        
         video { position:absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: 1; }
+
+        /* EFEITO TOUCH */
+        .touch-ripple {
+            position: absolute; border-radius: 50%; background: rgba(0, 229, 255, 0.4);
+            transform: scale(0); animation: ripple 0.6s linear; pointer-events: none; z-index: 20;
+        }
+        @keyframes ripple { to { transform: scale(4); opacity: 0; } }
+
         .hud { position:absolute; inset:0; z-index:10; pointer-events:none; display:flex; flex-direction:column; justify-content:flex-end; padding:25px; }
         .side { position:absolute; right:20px; bottom:50px; display:flex; flex-direction:column; gap:20px; pointer-events:auto; }
-        .btn-sync { width:65px; height:65px; border-radius:50%; background:var(--accent); color:#000; font-size:35px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; box-shadow: 0 0 25px rgba(0,229,255,0.5); }
+        
+        .btn-main { width:65px; height:65px; border-radius:50%; background:var(--accent); color:#000; font-size:35px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; box-shadow: 0 0 25px rgba(0,229,255,0.5); }
+        .btn-link { width:50px; height:50px; border-radius:50%; background:rgba(255,255,255,0.1); color:#fff; border:1px solid var(--accent); display:flex; align-items:center; justify-content:center; font-size:20px; backdrop-filter:blur(10px); cursor:pointer; }
     </style>
 </head>
-<body onclick="document.getElementById('v').play(); document.getElementById('v').muted=false;">
+<body onmousedown="createRipple(event)">
 
     <video id="v" loop playsinline autoplay></video>
 
     <div class="hud">
         <div class="side">
-            <button class="btn-sync" onclick="postarVideo()">+</button>
+            <label class="btn-main">
+                +
+                <input type="file" accept="video/*" multiple style="display:none" onchange="subirGaleria(this)">
+            </label>
+            <button class="btn-link" onclick="usarURL()">🔗</button>
+            <button class="btn-link" style="font-size:15px" onclick="proximo()">PRÓX</button>
         </div>
     </div>
 
@@ -40,26 +56,61 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const dbRef = ref(db, 'vibe_realtime');
+        const dbRef = ref(db, 'vibe_sync_master');
         const video = document.getElementById('v');
+        let playlist = [];
+        let index = 0;
 
-        // RADAR: Ouve o link novo e toca em todos os aparelhos
         onValue(query(dbRef, limitToLast(1)), (snapshot) => {
             const data = snapshot.val();
             if (data) {
                 const links = Object.values(data);
-                video.src = links[links.length - 1];
-                video.play();
+                const novoLink = links[links.length - 1];
+                if(video.src !== novoLink) { video.src = novoLink; video.play(); }
             }
         });
 
-        // FUNÇÃO PARA "GRITAR" O VÍDEO PARA OS OUTROS CELULARES
-        window.postarVideo = () => {
-            const link = prompt("Cole o link do vídeo MP4 para enviar a todos:");
-            if (link) {
-                push(dbRef, link);
-                alert("Vibe enviada! Olhe nos outros celulares.");
+        window.subirGaleria = (input) => {
+            const files = Array.from(input.files);
+            files.forEach(file => {
+                const url = URL.createObjectURL(file);
+                playlist.push(url);
+                push(dbRef, url); 
+            });
+            if (playlist.length > 0) tocar(playlist.length - files.length);
+        };
+
+        window.tocar = (idx) => {
+            video.src = playlist[idx];
+            video.play();
+            index = idx;
+        };
+
+        window.proximo = () => {
+            if(playlist.length > 0) {
+                index = (index + 1) % playlist.length;
+                tocar(index);
             }
+        };
+
+        window.usarURL = () => {
+            const link = prompt("Cole o link MP4 do vídeo:");
+            if (link) push(dbRef, link);
+        };
+
+        // EFEITO TOUCH E PAUSA
+        window.createRipple = (event) => {
+            if (event.target.tagName === 'BUTTON' || event.target.tagName === 'LABEL') return;
+            
+            const ripple = document.createElement("div");
+            ripple.className = "touch-ripple";
+            ripple.style.left = `${event.clientX - 25}px`;
+            ripple.style.top = `${event.clientY - 25}px`;
+            ripple.style.width = ripple.style.height = "50px";
+            document.body.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+
+            video.paused ? video.play() : video.pause();
         };
     </script>
 </body>
