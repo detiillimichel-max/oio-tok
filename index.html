@@ -3,153 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OIO ONE - VIBE</title>
-    <style>
-        * { margin:0; padding:0; box-sizing:border-box; font-family: sans-serif; }
-        body { background:#000; color:#fff; overflow:hidden; height:100vh; }
-
-        /* Camada 1: Identidade (Topo) */
-        #topo { position:fixed; top:0; width:100%; height:60px; display:flex; align-items:center; padding:10px; z-index:100; background:rgba(0,0,0,0.5); }
-        .foto-u { width:40px; height:40px; border-radius:50%; background:#333; border:2px solid #0af; background-size:cover; }
-        
-        /* Camada 2: Feed de Vídeo */
-        #feed { width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
-        video { width:100%; height:100%; object-fit:cover; }
-
-        /* Camada 3: Gaveta de Vidro (Contatos e Chat) */
-        #interface-oio {
-            position:fixed; bottom:-100%; left:0; width:100%; height:90%; 
-            background:rgba(15,15,15,0.98); backdrop-filter:blur(20px);
-            transition: 0.5s cubic-bezier(0.1, 0.7, 0.1, 1); border-radius:30px 30px 0 0; z-index:200;
-        }
-        #interface-oio.aberta { bottom:0; }
-
-        /* Telas Internas */
-        .tela { display:none; height:100%; flex-direction:column; padding:20px; }
-        .tela.ativa { display:flex; }
-
-        /* Lista de Contatos */
-        .contato { display:flex; align-items:center; padding:15px; border-bottom:1px solid #222; cursor:pointer; }
-        .contato:active { background:#222; }
-
-        /* Janela de Chat Individual */
-        #mensagens { flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:10px; }
-        .bolha { padding:10px 15px; border-radius:15px; max-width:80%; }
-        .minha { background:#0af; align-self:flex-end; }
-        .outra { background:#333; align-self:flex-start; }
-
-        #controles-chat { display:flex; padding:10px; gap:10px; }
-        input { flex:1; padding:12px; border-radius:20px; border:none; background:#222; color:#fff; }
-    </style>
+    <title>OIO ONE - Oficial</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-<div id="topo">
-    <div id="fotoPerfil" class="foto-u"></div>
-    <div id="nomeUser" style="margin-left:10px; font-weight:bold;">Michel (OIO ONE)</div>
-</div>
+    <header id="userHeader">
+        <div class="user-mini-photo" id="miniPhoto">👤</div>
+        <div class="user-info">
+            <span id="userNameTop">Michel</span>
+            <small>Online</small>
+        </div>
+    </header>
 
-<div id="feed" onclick="pausar()">
-    <video id="v-player" loop playsinline src=""></video>
-</div>
+    <div id="video-canvas">
+        <video id="v-player" loop playsinline autoplay muted></video>
+        <div id="video-overlay"></div>
+    </div>
 
-<div id="interface-oio">
-    <div style="width:50px; height:5px; background:#444; margin:10px auto; border-radius:10px;" onclick="fecharTudo()"></div>
-    
-    <div id="tela-contatos" class="tela ativa">
-        <h3>Conversas</h3>
-        <div id="lista">
+    <main id="app-layers">
+        <section id="vibe-chat" class="layer">
+            <header class="layer-header">
+                <button class="btn-back" onclick="showPage('')"><i class="fas fa-chevron-left"></i></button>
+                <h3>VIBE FAMÍLIA</h3>
+            </header>
+            <div id="chat-messages"></div>
+            <div class="chat-input-area">
+                <button class="btn-tool"><i class="fas fa-paperclip"></i></button>
+                <input type="text" id="msgInput" placeholder="Envie sua vibe...">
+                <button class="btn-send" onclick="enviarMensagem()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </section>
+
+        <section id="vibe-videos" class="layer">
+            <header class="layer-header">
+                <button class="btn-back" onclick="showPage('')"><i class="fas fa-chevron-left"></i></button>
+                <h3>FEED OIO</h3>
+            </header>
+            <div class="video-grid" id="feedGrid">
+                </div>
+        </section>
+
+        <section id="vibe-perfil" class="layer">
+            <div class="profile-editor">
+                <label class="photo-upload" id="photoPreview">
+                    <i class="fas fa-camera"></i>
+                    <input type="file" id="inputFoto" accept="image/*" onchange="previewImage(this)">
+                </label>
+                <input type="text" id="editNome" placeholder="Seu Nome">
+                <button class="btn-save" onclick="saveProfile()">SALVAR IDENTIDADE</button>
+                <button class="btn-close" onclick="showPage('')">CANCELAR</button>
+            </div>
+        </section>
+    </main>
+
+    <nav class="hud-controls">
+        <div class="side-menu">
+            <button class="btn-hud shadow" onclick="showPage('vibe-perfil')"><i class="fas fa-user-gear"></i></button>
+            <button class="btn-hud main-plus" id="btnPlus" onclick="toggleMenuPlus()">+</button>
+            <button class="btn-hud shadow" onclick="proximoVideo()"><i class="fas fa-forward-step"></i></button>
+        </div>
+    </nav>
+
+    <div id="menu-explosivo">
+        <div class="orbit-container">
+            <div class="app-item" onclick="showPage('vibe-chat')"><i class="fas fa-comments"></i><span>Vibe</span></div>
+            <div class="app-item" onclick="showPage('vibe-videos')"><i class="fas fa-film"></i><span>Vídeos</span></div>
+            <div class="app-item" onclick="window.location.href='https://maps.google.com'"><i class="fas fa-map-location-dot"></i><span>Maps</span></div>
+            <div class="app-item" onclick="window.location.href='https://youtube.com'"><i class="fab fa-youtube"></i><span>YouTube</span></div>
+        </div>
+    </div>
+
+    <div id="gaveta-contatos" class="gaveta-glass">
+        <div class="handle-bar"></div>
+        <div class="contatos-header">CONTATOS</div>
+        <div class="contatos-lista" id="listaContatos">
             </div>
     </div>
 
-    <div id="tela-chat-privado" class="tela">
-        <button onclick="voltarLista()" style="background:none; color:#0af; border:none; text-align:left; padding:10px;">← Voltar</button>
-        <h4 id="chat-com-nome">Nome</h4>
-        <div id="mensagens"></div>
-        <div id="controles-chat">
-            <input id="inputMsg" placeholder="Mensagem...">
-            <button onclick="enviarPrivado()" style="border:none; background:none; color:#0af; font-weight:bold;">ENVIAR</button>
-        </div>
-    </div>
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-<script>
-const firebaseConfig = {
-    apiKey: "SUA_API_KEY",
-    authDomain: "vibe-app-bbba2.firebaseapp.com",
-    databaseURL: "https://vibe-app-bbba2-default-rtdb.firebaseio.com",
-    projectId: "vibe-app-bbba2",
-    storageBucket: "vibe-app-bbba2.appspot.com"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-let usuarioAtual = "Michel";
-let contatoSelecionado = "";
-
-// GESTOS TOUCH
-let startY = 0;
-document.addEventListener('touchstart', e => startY = e.touches[0].clientY);
-document.addEventListener('touchend', e => {
-    let diff = startY - e.changedTouches[0].clientY;
-    if (diff > 80) document.getElementById('interface-oio').classList.add('aberta');
-    if (diff < -80) document.getElementById('interface-oio').classList.remove('aberta');
-});
-
-// LISTA DE CONTATOS (ESTÁTICA PARA TESTE, MAS CONECTA COM FIREBASE)
-const contatos = ["Michele", "Pai", "Esposa"];
-const listaDiv = document.getElementById('lista');
-contatos.forEach(c => {
-    let item = document.createElement('div');
-    item.className = 'contato';
-    item.innerHTML = `<div class="foto-u"></div> <span style="margin-left:15px">${c}</span>`;
-    item.onclick = () => abrirChatPrivado(c);
-    listaDiv.appendChild(item);
-});
-
-function abrirChatPrivado(nome) {
-    contatoSelecionado = nome;
-    document.getElementById('chat-com-nome').innerText = "Conversando com " + nome;
-    document.getElementById('tela-contatos').classList.remove('ativa');
-    document.getElementById('tela-chat-privado').classList.add('ativa');
-    ouvirMensagens(nome);
-}
-
-function voltarLista() {
-    document.getElementById('tela-chat-privado').classList.remove('ativa');
-    document.getElementById('tela-contatos').classList.add('ativa');
-}
-
-function fecharTudo() {
-    document.getElementById('interface-oio').classList.remove('aberta');
-}
-
-// CHAT REAL-TIME (LÓGICA PRIVADA)
-function enviarPrivado() {
-    const txt = document.getElementById('inputMsg').value;
-    if(!txt) return;
-    const rotaChat = `chats_privados/${usuarioAtual}_${contatoSelecionado}`; // Rota simplificada
-    db.ref(rotaChat).push({ de: usuarioAtual, texto: txt, tempo: Date.now() });
-    document.getElementById('inputMsg').value = "";
-}
-
-function ouvirMensagens(nome) {
-    const mDiv = document.getElementById('mensagens');
-    mDiv.innerHTML = "";
-    const rotaChat = `chats_privados/${usuarioAtual}_${nome}`;
-    db.ref(rotaChat).off(); // Limpa escuta anterior
-    db.ref(rotaChat).on('child_added', snap => {
-        const m = snap.val();
-        const b = document.createElement('div');
-        b.className = `bolha ${m.de === usuarioAtual ? 'minha' : 'outra'}`;
-        b.innerText = m.texto;
-        mDiv.appendChild(b);
-        mDiv.scrollTop = mDiv.scrollHeight;
-    });
-}
-</script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
