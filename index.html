@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <title>OIO ONE</title>
 
 <style>
 
-/* =========================
-RESET
-========================= */
+/* ============================= */
+/* RESET */
+/* ============================= */
 
 *{
 margin:0;
@@ -19,9 +20,9 @@ padding:0;
 box-sizing:border-box;
 }
 
-/* =========================
-BODY
-========================= */
+/* ============================= */
+/* BODY */
+/* ============================= */
 
 body{
 background:#000;
@@ -30,9 +31,9 @@ font-family:Arial;
 overflow:hidden;
 }
 
-/* =========================
-TOPO
-========================= */
+/* ============================= */
+/* TOPO */
+/* ============================= */
 
 #topo{
 position:fixed;
@@ -60,11 +61,11 @@ margin-right:10px;
 font-weight:bold;
 }
 
-/* =========================
-TELAS
-========================= */
+/* ============================= */
+/* FEED */
+/* ============================= */
 
-.tela{
+#feed{
 position:absolute;
 top:60px;
 bottom:0;
@@ -73,29 +74,49 @@ right:0;
 display:flex;
 align-items:center;
 justify-content:center;
-}
-
-/* =========================
-FEED
-========================= */
-
-#feed{
 background:#000;
 }
 
 video,iframe{
-max-width:100%;
-max-height:100%;
+width:100%;
+height:100%;
+object-fit:cover;
 }
 
-/* =========================
-CHAT
-========================= */
+/* ============================= */
+/* BOTÕES */
+/* ============================= */
+
+#acoes{
+position:fixed;
+right:10px;
+bottom:120px;
+display:flex;
+flex-direction:column;
+gap:20px;
+}
+
+.botao{
+background:#222;
+padding:14px;
+border-radius:50%;
+font-size:22px;
+cursor:pointer;
+}
+
+/* ============================= */
+/* CHAT */
+/* ============================= */
 
 #chat{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+height:50%;
 background:#111;
-flex-direction:column;
 display:none;
+flex-direction:column;
 }
 
 #mensagens{
@@ -108,34 +129,24 @@ padding:10px;
 margin-bottom:8px;
 }
 
-.msg b{
-color:#0af;
-}
-
-/* =========================
-INPUT CHAT
-========================= */
-
 #chatInput{
 display:flex;
-padding:10px;
-background:#000;
 }
 
 #msg{
 flex:1;
-padding:8px;
+padding:10px;
 border:none;
 outline:none;
 }
 
 #btnEnviar{
-padding:8px;
+padding:10px;
 }
 
-/* =========================
-BOTÕES
-========================= */
+/* ============================= */
+/* CONTROLES */
+/* ============================= */
 
 #controles{
 position:fixed;
@@ -146,46 +157,24 @@ flex-direction:column;
 gap:10px;
 }
 
-.botao{
-background:#222;
-padding:12px;
-border-radius:50%;
-cursor:pointer;
-}
-
-/* =========================
-UPLOAD
-========================= */
-
-#videoInput{
-display:none;
-}
-
-#fotoInput{
-display:none;
-}
-
 </style>
 
 </head>
+
 <body>
 
-<!-- ======================
-TOPO
-====================== -->
+<!-- TOPO -->
 
 <div id="topo">
 
 <div id="fotoPerfil"></div>
-<div id="nomePerfil">Usuário</div>
+<div id="nomePerfil"></div>
 
 </div>
 
-<!-- ======================
-FEED
-====================== -->
+<!-- FEED -->
 
-<div id="feed" class="tela">
+<div id="feed">
 
 <video id="player" controls></video>
 
@@ -196,11 +185,18 @@ style="display:none"></iframe>
 
 </div>
 
-<!-- ======================
-CHAT
-====================== -->
+<!-- BOTÕES -->
 
-<div id="chat" class="tela">
+<div id="acoes">
+
+<div class="botao" id="btnCurtir">❤</div>
+<div class="botao" id="btnChat">💬</div>
+
+</div>
+
+<!-- CHAT -->
+
+<div id="chat">
 
 <div id="mensagens"></div>
 
@@ -214,38 +210,28 @@ CHAT
 
 </div>
 
-<!-- ======================
-CONTROLES
-====================== -->
+<!-- CONTROLES -->
 
 <div id="controles">
 
 <div class="botao" id="btnUpload">🎬</div>
-
 <div class="botao" id="btnYoutube">▶</div>
-
 <div class="botao" id="btnFoto">📷</div>
 
 </div>
 
-<input type="file" id="videoInput" accept="video/*">
-<input type="file" id="fotoInput" accept="image/*">
+<input type="file" id="videoInput" accept="video/*" style="display:none">
+<input type="file" id="fotoInput" accept="image/*" style="display:none">
 
-<!-- ======================
-FIREBASE
-====================== -->
+<!-- FIREBASE -->
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 <script>
 
-/* =========================
-CONFIG FIREBASE
-========================= */
+/* CONFIG FIREBASE */
 
 const firebaseConfig = {
 
@@ -259,156 +245,227 @@ projectId:"vibe-app-bbba2",
 
 storageBucket:"vibe-app-bbba2.appspot.com"
 
-};
+}
 
-firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig)
 
-/* =========================
-REFERÊNCIAS
-========================= */
+/* REFERÊNCIAS */
 
-const dbChat = firebase.database().ref("mensagens");
+const dbChat = firebase.database().ref("mensagens")
+const dbVideos = firebase.database().ref("videos")
+const storage = firebase.storage()
 
-const dbVideos = firebase.database().ref("videos");
+/* PERFIL */
 
-const storage = firebase.storage();
-
-/* =========================
-PERFIL
-========================= */
-
-let perfil = JSON.parse(localStorage.getItem("perfil")) || {};
+let perfil = JSON.parse(localStorage.getItem("perfil")) || {}
 
 if(!perfil.nome){
 
-perfil.nome = prompt("Digite seu nome");
+perfil.nome = prompt("Seu nome")
 
-localStorage.setItem("perfil",JSON.stringify(perfil));
+localStorage.setItem("perfil",JSON.stringify(perfil))
 
 }
 
-nomePerfil.innerText = perfil.nome;
+nomePerfil.innerText = perfil.nome
 
 if(perfil.foto){
 
-fotoPerfil.style.backgroundImage="url("+perfil.foto+")";
+fotoPerfil.style.backgroundImage="url("+perfil.foto+")"
 
 }
 
-/* =========================
-ALTERAR FOTO
-========================= */
+/* FOTO PERFIL */
 
-btnFoto.onclick = ()=>{
+btnFoto.onclick=()=>{
 
-fotoInput.click();
+fotoInput.click()
 
 }
 
-fotoInput.onchange = e=>{
+fotoInput.onchange=e=>{
 
-let file = e.target.files[0];
+let file=e.target.files[0]
 
-let reader = new FileReader();
+let reader=new FileReader()
 
-reader.onload = ()=>{
+reader.onload=()=>{
 
-perfil.foto = reader.result;
+perfil.foto=reader.result
 
-localStorage.setItem("perfil",JSON.stringify(perfil));
+localStorage.setItem("perfil",JSON.stringify(perfil))
 
-fotoPerfil.style.backgroundImage="url("+perfil.foto+")";
-
-}
-
-reader.readAsDataURL(file);
+fotoPerfil.style.backgroundImage="url("+perfil.foto+")"
 
 }
 
-/* =========================
-CHAT
-========================= */
+reader.readAsDataURL(file)
 
-btnEnviar.onclick = enviar;
+}
 
-function enviar(){
+/* CHAT */
 
-let texto = msg.value;
+btnEnviar.onclick=()=>{
 
-if(!texto) return;
+let texto=msg.value
+
+if(!texto) return
 
 dbChat.push({
 
 nome:perfil.nome,
 texto:texto,
-foto:perfil.foto || "",
 tempo:Date.now()
 
-});
+})
 
-msg.value="";
+msg.value=""
 
 }
 
 dbChat.on("child_added",snap=>{
 
-let m = snap.val();
+let m=snap.val()
 
-let div = document.createElement("div");
+let div=document.createElement("div")
 
-div.className="msg";
+div.className="msg"
 
-div.innerHTML = "<b>"+m.nome+"</b>: "+m.texto;
+div.innerHTML="<b>"+m.nome+"</b>: "+m.texto
 
-mensagens.appendChild(div);
+mensagens.appendChild(div)
 
-mensagens.scrollTop = mensagens.scrollHeight;
+mensagens.scrollTop=mensagens.scrollHeight
 
-});
+})
 
-/* =========================
-UPLOAD VIDEO
-========================= */
+/* FEED */
 
-btnUpload.onclick = ()=>{
+let feed=[]
+let index=0
 
-videoInput.click();
+dbVideos.on("child_added",snap=>{
 
-}
+feed.push(snap.val())
 
-videoInput.onchange = e=>{
+if(feed.length==1){
 
-let file = e.target.files[0];
-
-let video = document.createElement("video");
-
-video.preload="metadata";
-
-video.onloadedmetadata = function(){
-
-if(video.duration > 30){
-
-alert("Vídeo máximo 30s");
-
-return;
+tocar(feed[0])
 
 }
 
-uploadVideo(file);
+})
+
+function tocar(v){
+
+if(v.tipo=="galeria"){
+
+player.style.display="block"
+youtube.style.display="none"
+
+player.src=v.url
+player.play()
 
 }
 
-video.src = URL.createObjectURL(file);
+if(v.tipo=="youtube"){
+
+player.style.display="none"
+youtube.style.display="block"
+
+youtube.src="https://www.youtube.com/embed/"+v.id
 
 }
 
-/* =========================
-UPLOAD STORAGE
-========================= */
+}
+
+function proximo(){
+
+index++
+
+if(index>=feed.length){
+
+index=0
+
+}
+
+tocar(feed[index])
+
+}
+
+player.onended=proximo
+
+/* SWIPE */
+
+let startY=0
+
+document.addEventListener("touchstart",e=>{
+
+startY=e.touches[0].clientY
+
+})
+
+document.addEventListener("touchend",e=>{
+
+let dy=e.changedTouches[0].clientY-startY
+
+if(dy<-80) proximo()
+
+if(dy>80) toggleChat()
+
+})
+
+function toggleChat(){
+
+if(chat.style.display=="none"){
+
+chat.style.display="flex"
+
+}else{
+
+chat.style.display="none"
+
+}
+
+}
+
+/* UPLOAD */
+
+btnUpload.onclick=()=>{
+
+videoInput.click()
+
+}
+
+videoInput.onchange=e=>{
+
+let file=e.target.files[0]
+
+let video=document.createElement("video")
+
+video.preload="metadata"
+
+video.onloadedmetadata=function(){
+
+if(video.duration>30){
+
+alert("Máx 30s")
+
+return
+
+}
+
+uploadVideo(file)
+
+}
+
+video.src=URL.createObjectURL(file)
+
+}
 
 function uploadVideo(file){
 
-let ref = storage.ref("videos/"+Date.now()+".mp4");
+let ref=storage.ref("videos/"+Date.now()+".mp4")
 
 ref.put(file).then(s=>{
 
@@ -421,25 +478,25 @@ tipo:"galeria",
 url:url,
 tempo:Date.now()
 
-});
+})
 
-});
+})
 
-});
+})
 
 }
 
-/* =========================
-YOUTUBE
-========================= */
+/* YOUTUBE */
 
-btnYoutube.onclick = ()=>{
+btnYoutube.onclick=()=>{
 
-let link = prompt("Cole link YouTube");
+let link=prompt("Link YouTube")
 
-if(!link) return;
+if(!link) return
 
-let id = extrairID(link);
+let id=link.split("v=")[1]
+
+if(id) id=id.split("&")[0]
 
 dbVideos.push({
 
@@ -448,145 +505,7 @@ tipo:"youtube",
 id:id,
 tempo:Date.now()
 
-});
-
-}
-
-function extrairID(url){
-
-let v = url.split("v=")[1];
-
-if(v) return v.split("&")[0];
-
-return url;
-
-}
-
-/* =========================
-FEED
-========================= */
-
-let feed = [];
-
-let index = 0;
-
-dbVideos.on("child_added",snap=>{
-
-feed.push(snap.val());
-
-if(feed.length==1){
-
-tocar(feed[0]);
-
-}
-
-});
-
-/* =========================
-TOCAR VIDEO
-========================= */
-
-function tocar(v){
-
-if(v.tipo=="galeria"){
-
-player.style.display="block";
-
-youtube.style.display="none";
-
-player.src = v.url;
-
-player.play();
-
-}
-
-if(v.tipo=="youtube"){
-
-player.style.display="none";
-
-youtube.style.display="block";
-
-youtube.src = "https://www.youtube.com/embed/"+v.id;
-
-}
-
-}
-
-/* =========================
-SWIPE
-========================= */
-
-let startY = 0;
-
-document.addEventListener("touchstart",e=>{
-
-startY = e.touches[0].clientY;
-
-});
-
-document.addEventListener("touchend",e=>{
-
-let endY = e.changedTouches[0].clientY;
-
-let dy = endY - startY;
-
-/* swipe cima */
-
-if(dy < -80){
-
-proximoVideo();
-
-}
-
-/* swipe baixo */
-
-if(dy > 80){
-
-toggleChat();
-
-}
-
-});
-
-/* =========================
-PROXIMO VIDEO
-========================= */
-
-function proximoVideo(){
-
-index++;
-
-if(index >= feed.length){
-
-index = 0;
-
-}
-
-tocar(feed[index]);
-
-}
-
-/* =========================
-CHAT ABRIR
-========================= */
-
-function toggleChat(){
-
-if(chat.style.display=="none"){
-
-chat.style.display="flex";
-
-feed.style.display="none";
-
-}
-
-else{
-
-chat.style.display="none";
-
-feed.style.display="flex";
-
-}
+})
 
 }
 
