@@ -4,258 +4,519 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
 <title>OIO ONE</title>
 
 <style>
+
+/* =========================
+RESET
+========================= */
 
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:sans-serif;
 }
+
+/* =========================
+BODY
+========================= */
 
 body{
 background:#000;
-color:white;
-height:100vh;
+color:#fff;
+font-family:Arial;
 overflow:hidden;
 }
 
-video{
-position:absolute;
-top:0;
-left:0;
-width:100%;
-height:100%;
-object-fit:cover;
-z-index:1;
-}
+/* =========================
+TOPO
+========================= */
 
-/* HEADER */
-
-#user{
-position:absolute;
-top:20px;
-left:20px;
-z-index:10;
-background:rgba(0,0,0,.5);
-padding:8px 15px;
-border-radius:20px;
-}
-
-/* PÁGINAS */
-
-.page{
+#topo{
 position:fixed;
 top:0;
 left:0;
-width:100%;
-height:100%;
+right:0;
+height:60px;
+background:#111;
+display:flex;
+align-items:center;
+padding:10px;
+z-index:10;
+}
+
+#fotoPerfil{
+width:40px;
+height:40px;
+border-radius:50%;
+background:#333;
+background-size:cover;
+margin-right:10px;
+}
+
+#nomePerfil{
+font-weight:bold;
+}
+
+/* =========================
+TELAS
+========================= */
+
+.tela{
+position:absolute;
+top:60px;
+bottom:0;
+left:0;
+right:0;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+/* =========================
+FEED
+========================= */
+
+#feed{
+background:#000;
+}
+
+video,iframe{
+max-width:100%;
+max-height:100%;
+}
+
+/* =========================
+CHAT
+========================= */
+
+#chat{
+background:#111;
+flex-direction:column;
 display:none;
-flex-direction:column;
-z-index:20;
-background:rgba(0,0,0,.9);
 }
 
-.page.active{
-display:flex;
-}
-
-/* CHAT */
-
-#messages{
+#mensagens{
 flex:1;
-overflow-y:auto;
-padding:20px;
-display:flex;
-flex-direction:column;
-gap:10px;
+overflow:auto;
+padding:10px;
 }
 
 .msg{
-padding:10px 15px;
-background:#222;
-border-radius:12px;
-max-width:80%;
+margin-bottom:8px;
 }
 
-.me{
-background:#00e5ff;
-color:#000;
-align-self:flex-end;
+.msg b{
+color:#0af;
 }
 
-.controls{
+/* =========================
+INPUT CHAT
+========================= */
+
+#chatInput{
 display:flex;
-padding:15px;
-gap:10px;
-background:#111;
-}
-
-.controls input{
-flex:1;
 padding:10px;
-border:none;
-border-radius:20px;
-background:#222;
-color:white;
+background:#000;
 }
 
-button{
-padding:10px 15px;
+#msg{
+flex:1;
+padding:8px;
 border:none;
-border-radius:20px;
-background:#00e5ff;
-color:#000;
+outline:none;
+}
+
+#btnEnviar{
+padding:8px;
+}
+
+/* =========================
+BOTÕES
+========================= */
+
+#controles{
+position:fixed;
+right:10px;
+bottom:20px;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.botao{
+background:#222;
+padding:12px;
+border-radius:50%;
+cursor:pointer;
+}
+
+/* =========================
+UPLOAD
+========================= */
+
+#videoInput{
+display:none;
+}
+
+#fotoInput{
+display:none;
 }
 
 </style>
-</head>
 
+</head>
 <body>
 
-<div id="user">Michel</div>
+<!-- ======================
+TOPO
+====================== -->
 
-<video id="player" autoplay loop muted></video>
+<div id="topo">
 
-<!-- CHAT -->
+<div id="fotoPerfil"></div>
+<div id="nomePerfil">Usuário</div>
 
-<div id="chat" class="page">
+</div>
 
-<div id="messages"></div>
+<!-- ======================
+FEED
+====================== -->
 
-<div class="controls">
-<input id="msg" placeholder="mensagem">
-<button onclick="send()">Enviar</button>
+<div id="feed" class="tela">
+
+<video id="player" controls></video>
+
+<iframe id="youtube"
+frameborder="0"
+allowfullscreen
+style="display:none"></iframe>
+
+</div>
+
+<!-- ======================
+CHAT
+====================== -->
+
+<div id="chat" class="tela">
+
+<div id="mensagens"></div>
+
+<div id="chatInput">
+
+<input id="msg" placeholder="Mensagem">
+
+<button id="btnEnviar">Enviar</button>
+
 </div>
 
 </div>
 
-<!-- VÍDEOS -->
+<!-- ======================
+CONTROLES
+====================== -->
 
-<div id="videos" class="page">
+<div id="controles">
 
-<div style="margin:auto;text-align:center">
+<div class="botao" id="btnUpload">🎬</div>
 
-<h2>Adicionar vídeo</h2>
+<div class="botao" id="btnYoutube">▶</div>
+
+<div class="botao" id="btnFoto">📷</div>
+
+</div>
 
 <input type="file" id="videoInput" accept="video/*">
+<input type="file" id="fotoInput" accept="image/*">
 
-</div>
+<!-- ======================
+FIREBASE
+====================== -->
 
-</div>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 <script>
 
-/* FIREBASE */
+/* =========================
+CONFIG FIREBASE
+========================= */
 
 const firebaseConfig = {
 
 apiKey:"SUA_API_KEY",
+
+authDomain:"vibe-app-bbba2.firebaseapp.com",
+
 databaseURL:"https://vibe-app-bbba2-default-rtdb.firebaseio.com",
-projectId:"vibe-app-bbba2"
+
+projectId:"vibe-app-bbba2",
+
+storageBucket:"vibe-app-bbba2.appspot.com"
 
 };
 
 firebase.initializeApp(firebaseConfig);
 
-const db = firebase.database().ref("chat");
+/* =========================
+REFERÊNCIAS
+========================= */
 
-/* NOME */
+const dbChat = firebase.database().ref("mensagens");
 
-let nome = localStorage.getItem("nome") || "Michel";
+const dbVideos = firebase.database().ref("videos");
 
-/* CHAT */
+const storage = firebase.storage();
 
-function send(){
+/* =========================
+PERFIL
+========================= */
 
-let txt = document.getElementById("msg");
+let perfil = JSON.parse(localStorage.getItem("perfil")) || {};
 
-if(txt.value.trim()=="") return;
+if(!perfil.nome){
 
-db.push({
+perfil.nome = prompt("Digite seu nome");
 
-nome:nome,
-texto:txt.value,
-time:Date.now()
-
-});
-
-txt.value="";
+localStorage.setItem("perfil",JSON.stringify(perfil));
 
 }
 
-db.limitToLast(20).on("value",snap=>{
+nomePerfil.innerText = perfil.nome;
 
-let box = document.getElementById("messages");
+if(perfil.foto){
 
-box.innerHTML="";
+fotoPerfil.style.backgroundImage="url("+perfil.foto+")";
 
-snap.forEach(i=>{
+}
 
-let m = i.val();
+/* =========================
+ALTERAR FOTO
+========================= */
 
-let d = document.createElement("div");
+btnFoto.onclick = ()=>{
 
-d.className="msg";
+fotoInput.click();
 
-if(m.nome===nome)d.classList.add("me");
+}
 
-d.innerHTML="<b>"+m.nome+"</b><br>"+m.texto;
-
-box.appendChild(d);
-
-});
-
-box.scrollTop=box.scrollHeight;
-
-});
-
-/* VÍDEO */
-
-let player = document.getElementById("player");
-
-document.getElementById("videoInput").onchange = e=>{
+fotoInput.onchange = e=>{
 
 let file = e.target.files[0];
 
 let reader = new FileReader();
 
-reader.onload = ev=>{
+reader.onload = ()=>{
 
-player.src = ev.target.result;
+perfil.foto = reader.result;
 
-closePages();
+localStorage.setItem("perfil",JSON.stringify(perfil));
 
-};
+fotoPerfil.style.backgroundImage="url("+perfil.foto+")";
+
+}
 
 reader.readAsDataURL(file);
 
-};
+}
 
-/* PÁGINAS */
+/* =========================
+CHAT
+========================= */
 
-function openPage(id){
+btnEnviar.onclick = enviar;
 
-document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+function enviar(){
 
-document.getElementById(id).classList.add("active");
+let texto = msg.value;
+
+if(!texto) return;
+
+dbChat.push({
+
+nome:perfil.nome,
+texto:texto,
+foto:perfil.foto || "",
+tempo:Date.now()
+
+});
+
+msg.value="";
 
 }
 
-function closePages(){
+dbChat.on("child_added",snap=>{
 
-document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+let m = snap.val();
+
+let div = document.createElement("div");
+
+div.className="msg";
+
+div.innerHTML = "<b>"+m.nome+"</b>: "+m.texto;
+
+mensagens.appendChild(div);
+
+mensagens.scrollTop = mensagens.scrollHeight;
+
+});
+
+/* =========================
+UPLOAD VIDEO
+========================= */
+
+btnUpload.onclick = ()=>{
+
+videoInput.click();
 
 }
 
-/* SWIPE */
+videoInput.onchange = e=>{
 
-let startY=0;
+let file = e.target.files[0];
+
+let video = document.createElement("video");
+
+video.preload="metadata";
+
+video.onloadedmetadata = function(){
+
+if(video.duration > 30){
+
+alert("Vídeo máximo 30s");
+
+return;
+
+}
+
+uploadVideo(file);
+
+}
+
+video.src = URL.createObjectURL(file);
+
+}
+
+/* =========================
+UPLOAD STORAGE
+========================= */
+
+function uploadVideo(file){
+
+let ref = storage.ref("videos/"+Date.now()+".mp4");
+
+ref.put(file).then(s=>{
+
+s.ref.getDownloadURL().then(url=>{
+
+dbVideos.push({
+
+usuario:perfil.nome,
+tipo:"galeria",
+url:url,
+tempo:Date.now()
+
+});
+
+});
+
+});
+
+}
+
+/* =========================
+YOUTUBE
+========================= */
+
+btnYoutube.onclick = ()=>{
+
+let link = prompt("Cole link YouTube");
+
+if(!link) return;
+
+let id = extrairID(link);
+
+dbVideos.push({
+
+usuario:perfil.nome,
+tipo:"youtube",
+id:id,
+tempo:Date.now()
+
+});
+
+}
+
+function extrairID(url){
+
+let v = url.split("v=")[1];
+
+if(v) return v.split("&")[0];
+
+return url;
+
+}
+
+/* =========================
+FEED
+========================= */
+
+let feed = [];
+
+let index = 0;
+
+dbVideos.on("child_added",snap=>{
+
+feed.push(snap.val());
+
+if(feed.length==1){
+
+tocar(feed[0]);
+
+}
+
+});
+
+/* =========================
+TOCAR VIDEO
+========================= */
+
+function tocar(v){
+
+if(v.tipo=="galeria"){
+
+player.style.display="block";
+
+youtube.style.display="none";
+
+player.src = v.url;
+
+player.play();
+
+}
+
+if(v.tipo=="youtube"){
+
+player.style.display="none";
+
+youtube.style.display="block";
+
+youtube.src = "https://www.youtube.com/embed/"+v.id;
+
+}
+
+}
+
+/* =========================
+SWIPE
+========================= */
+
+let startY = 0;
 
 document.addEventListener("touchstart",e=>{
 
@@ -265,21 +526,69 @@ startY = e.touches[0].clientY;
 
 document.addEventListener("touchend",e=>{
 
-let dy = startY - e.changedTouches[0].clientY;
+let endY = e.changedTouches[0].clientY;
 
-if(dy>80){
+let dy = endY - startY;
 
-openPage("videos");
+/* swipe cima */
+
+if(dy < -80){
+
+proximoVideo();
 
 }
 
-if(dy<-80){
+/* swipe baixo */
 
-openPage("chat");
+if(dy > 80){
+
+toggleChat();
 
 }
 
 });
+
+/* =========================
+PROXIMO VIDEO
+========================= */
+
+function proximoVideo(){
+
+index++;
+
+if(index >= feed.length){
+
+index = 0;
+
+}
+
+tocar(feed[index]);
+
+}
+
+/* =========================
+CHAT ABRIR
+========================= */
+
+function toggleChat(){
+
+if(chat.style.display=="none"){
+
+chat.style.display="flex";
+
+feed.style.display="none";
+
+}
+
+else{
+
+chat.style.display="none";
+
+feed.style.display="flex";
+
+}
+
+}
 
 </script>
 
