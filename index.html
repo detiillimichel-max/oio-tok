@@ -1,192 +1,450 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>OIO ONE</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-    <style>
-        :root { --accent: #00e5ff; --glass: rgba(255, 255, 255, 0.1); }
-        *{ margin:0; padding:0; box-sizing:border-box; }
-        body{ background:#000; color:#fff; font-family:Arial, sans-serif; overflow:hidden; position:fixed; width:100%; height:100%; }
 
-        /* TOPO COM BLUR */
-        #topo{ position:fixed; top:0; left:0; right:0; height:60px; background:rgba(17,17,17,0.7); backdrop-filter:blur(10px); display:flex; align-items:center; padding:10px; z-index:100; border-bottom:1px solid var(--glass); }
-        #fotoPerfil{ width:40px; height:40px; border-radius:50%; border:2px solid var(--accent); background:#333; background-size:cover; background-position:center; margin-right:10px; }
-        #nomePerfil{ font-weight:bold; font-size: 14px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-        /* FEED CHEIO */
-        #feed{ position:absolute; top:0; bottom:0; left:0; right:0; display:flex; align-items:center; justify-content:center; background:#000; }
-        video{ width:100%; height:100%; object-fit:cover; }
+<title>OIO ONE</title>
 
-        /* BOTÕES FLUTUANTES */
-        #acoes{ position:fixed; right:15px; bottom:120px; display:flex; flex-direction:column; gap:20px; z-index:110; }
-        .botao{ background:rgba(34,34,34,0.6); backdrop-filter:blur(5px); padding:14px; border-radius:50%; font-size:22px; cursor:pointer; border:1px solid var(--glass); color:var(--accent); text-align:center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+<style>
 
-        /* CHAT EM CAMADA DE PROFUNDIDADE */
-        #chat{ position:fixed; bottom:0; left:0; right:0; height:60%; background: radial-gradient(circle at top, #001a33, #000); display:none; flex-direction:column; z-index:120; border-top: 1px solid var(--glass); border-radius: 20px 20px 0 0; animation: slideUp 0.4s ease; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        
-        #mensagens{ flex:1; overflow-y:auto; padding:15px; display:flex; flex-direction:column; gap:8px; }
-        .msg{ background:rgba(255,255,255,0.05); padding:10px; border-radius:12px; max-width:85%; border: 1px solid rgba(0,229,255,0.1); }
-        .msg b{ color:var(--accent); font-size: 12px; display:block; margin-bottom: 2px; }
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
 
-        /* INPUT CHAT */
-        #chatInput{ display:flex; padding:15px; background:rgba(0,0,0,0.8); gap:10px; align-items:center; }
-        #msg{ flex:1; padding:12px; border:none; outline:none; border-radius:25px; background:#222; color:#fff; }
-        #btnEnviar{ background:var(--accent); color:#000; border:none; width:45px; height:45px; border-radius:50%; font-size:20px; cursor:pointer; }
-    </style>
+body{
+background:#000;
+color:#fff;
+font-family:Arial;
+overflow:hidden;
+}
+
+/* TOPO */
+
+#topo{
+position:fixed;
+top:0;
+left:0;
+right:0;
+height:60px;
+background:#111;
+display:flex;
+align-items:center;
+padding:10px;
+z-index:10;
+}
+
+#fotoPerfil{
+width:40px;
+height:40px;
+border-radius:50%;
+background:#333;
+background-size:cover;
+margin-right:10px;
+}
+
+#nomePerfil{
+font-weight:bold;
+}
+
+/* FEED */
+
+#feed{
+position:absolute;
+top:60px;
+bottom:0;
+left:0;
+right:0;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+video{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+/* BOTÕES */
+
+#acoes{
+position:fixed;
+right:10px;
+bottom:120px;
+display:flex;
+flex-direction:column;
+gap:20px;
+}
+
+.botao{
+background:#222;
+padding:12px;
+border-radius:50%;
+font-size:20px;
+cursor:pointer;
+}
+
+/* CHAT */
+
+#chat{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+height:50%;
+background:#111;
+display:none;
+flex-direction:column;
+}
+
+#mensagens{
+flex:1;
+overflow:auto;
+padding:10px;
+}
+
+.msg{
+margin-bottom:8px;
+}
+
+#chatInput{
+display:flex;
+}
+
+#msg{
+flex:1;
+padding:10px;
+border:none;
+outline:none;
+}
+
+#btnEnviar{
+padding:10px;
+}
+
+</style>
+
 </head>
+
 <body>
 
+<!-- TOPO -->
+
 <div id="topo">
-    <div id="fotoPerfil" onclick="document.getElementById('fotoInput').click()"></div>
-    <div id="nomePerfil"></div>
+
+<div id="fotoPerfil"></div>
+<div id="nomePerfil"></div>
+
 </div>
+
+<!-- FEED -->
 
 <div id="feed">
-    <video id="player" loop playsinline autoplay></video>
+
+<video id="player" controls></video>
+
 </div>
+
+<!-- AÇÕES -->
 
 <div id="acoes">
-    <div class="botao" id="btnCurtir">❤️</div>
-    <div class="botao" id="btnChat">💬</div>
-    <div class="botao" id="btnUpload">🎬</div>
+
+<div class="botao" id="btnCurtir">❤️</div>
+
+<div class="botao" id="btnChat">💬</div>
+
+<div class="botao" id="btnUpload">🎬</div>
+
+<div class="botao" id="btnFoto">📷</div>
+
 </div>
 
+<!-- CHAT -->
+
 <div id="chat">
-    <div id="mensagens"></div>
-    <div id="chatInput">
-        <input id="msg" placeholder="Sua vibe...">
-        <button id="btnEnviar"><i class="fa-solid fa-paper-plane"></i></button>
-    </div>
+
+<div id="mensagens"></div>
+
+<div id="chatInput">
+
+<input id="msg" placeholder="Mensagem">
+
+<button id="btnEnviar">Enviar</button>
+
+</div>
+
 </div>
 
 <input type="file" id="videoInput" accept="video/*" style="display:none">
+
 <input type="file" id="fotoInput" accept="image/*" style="display:none">
 
+<!-- FIREBASE -->
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 <script>
-const firebaseConfig = {
-    apiKey: "AIzaSyAWL1XRR8JK-J5Qk5DSIKmBl4ZYMZw1R4I", // Chave Michel identificada
-    authDomain: "vibe-app-bbba2.firebaseapp.com",
-    databaseURL: "https://vibe-app-bbba2-default-rtdb.firebaseio.com",
-    projectId: "vibe-app-bbba2",
-    storageBucket: "vibe-app-bbba2.appspot.com"
-};
-firebase.initializeApp(firebaseConfig);
 
-const dbVideos = firebase.database().ref("videos");
-const dbChat = firebase.database().ref("mensagens");
-const dbLikes = firebase.database().ref("likes");
-const storage = firebase.storage();
+/* CONFIG FIREBASE */
+
+const firebaseConfig = {
+
+apiKey:"SUA_API_KEY",
+
+authDomain:"vibe-app-bbba2.firebaseapp.com",
+
+databaseURL:"https://vibe-app-bbba2-default-rtdb.firebaseio.com",
+
+projectId:"vibe-app-bbba2",
+
+storageBucket:"vibe-app-bbba2.appspot.com"
+
+}
+
+firebase.initializeApp(firebaseConfig)
+
+/* BANCO */
+
+const dbVideos = firebase.database().ref("videos")
+const dbChat = firebase.database().ref("mensagens")
+const dbLikes = firebase.database().ref("likes")
+
+const storage = firebase.storage()
 
 /* PERFIL */
-let perfil = JSON.parse(localStorage.getItem("perfil")) || {};
+
+let perfil = JSON.parse(localStorage.getItem("perfil")) || {}
+
 if(!perfil.nome){
-    perfil.nome = prompt("OIO ONE - Digite seu nome:");
-    localStorage.setItem("perfil", JSON.stringify(perfil));
+
+perfil.nome = prompt("Seu nome")
+
+localStorage.setItem("perfil",JSON.stringify(perfil))
+
 }
-nomePerfil.innerText = perfil.nome;
-if(perfil.foto) fotoPerfil.style.backgroundImage = `url(${perfil.foto})`;
+
+nomePerfil.innerText = perfil.nome
+
+if(perfil.foto){
+
+fotoPerfil.style.backgroundImage="url("+perfil.foto+")"
+
+}
 
 /* FOTO PERFIL */
-fotoInput.onchange = e => {
-    let reader = new FileReader();
-    reader.onload = () => {
-        perfil.foto = reader.result;
-        localStorage.setItem("perfil", JSON.stringify(perfil));
-        fotoPerfil.style.backgroundImage = `url(${reader.result})`;
-    };
-    reader.readAsDataURL(e.target.files[0]);
-};
+
+btnFoto.onclick=()=>{
+
+fotoInput.click()
+
+}
+
+fotoInput.onchange=e=>{
+
+let file=e.target.files[0]
+
+let reader=new FileReader()
+
+reader.onload=()=>{
+
+perfil.foto=reader.result
+
+localStorage.setItem("perfil",JSON.stringify(perfil))
+
+fotoPerfil.style.backgroundImage="url("+perfil.foto+")"
+
+}
+
+reader.readAsDataURL(file)
+
+}
 
 /* CHAT */
-btnChat.onclick = () => {
-    chat.style.display = chat.style.display === "flex" ? "none" : "flex";
-    if(navigator.vibrate) navigator.vibrate(30);
-};
 
-btnEnviar.onclick = () => {
-    let texto = msg.value;
-    if(!texto) return;
-    dbChat.push({ nome: perfil.nome, texto: texto, tempo: Date.now() });
-    msg.value = "";
-    if(navigator.vibrate) navigator.vibrate(50);
-};
+btnChat.onclick=()=>{
 
-dbChat.on("child_added", snap => {
-    let m = snap.val();
-    let div = document.createElement("div");
-    div.className = "msg";
-    div.innerHTML = "<b>"+m.nome+"</b>"+m.texto;
-    mensagens.appendChild(div);
-    mensagens.scrollTop = mensagens.scrollHeight;
-});
+chat.style.display = chat.style.display=="flex" ? "none" : "flex"
+
+}
+
+btnEnviar.onclick=()=>{
+
+let texto = msg.value
+
+if(!texto) return
+
+dbChat.push({
+
+nome:perfil.nome,
+texto:texto,
+tempo:Date.now()
+
+})
+
+msg.value=""
+
+}
+
+dbChat.on("child_added",snap=>{
+
+let m = snap.val()
+
+let div = document.createElement("div")
+
+div.className="msg"
+
+div.innerHTML="<b>"+m.nome+"</b>: "+m.texto
+
+mensagens.appendChild(div)
+
+mensagens.scrollTop=mensagens.scrollHeight
+
+})
 
 /* FEED */
-let feed = [];
-let index = 0;
 
-dbVideos.on("child_added", snap => {
-    feed.push(snap.val());
-    if(feed.length === 1) tocar(feed[0]);
-});
+let feed=[]
+let index=0
+
+dbVideos.on("child_added",snap=>{
+
+feed.push(snap.val())
+
+if(feed.length==1){
+
+tocar(feed[0])
+
+}
+
+})
 
 function tocar(v){
-    player.src = v.url;
-    player.play();
+
+player.src=v.url
+player.play()
+
 }
 
-/* GESTO DE TROCA (OIO ONE DNA) */
-let startY = 0;
-document.addEventListener("touchstart", e => startY = e.touches[0].clientY);
-document.addEventListener("touchend", e => {
-    let dy = e.changedTouches[0].clientY - startY;
-    if(dy < -80) proximo();
-});
+/* SWIPE */
+
+let startY=0
+
+document.addEventListener("touchstart",e=>{
+
+startY=e.touches[0].clientY
+
+})
+
+document.addEventListener("touchend",e=>{
+
+let dy=e.changedTouches[0].clientY-startY
+
+if(dy<-80){
+
+proximo()
+
+}
+
+})
 
 function proximo(){
-    index++;
-    if(index >= feed.length) index = 0;
-    tocar(feed[index]);
-    if(navigator.vibrate) navigator.vibrate(40);
+
+index++
+
+if(index>=feed.length){
+
+index=0
+
 }
 
-/* UPLOAD VIDEO */
-btnUpload.onclick = () => videoInput.click();
-videoInput.onchange = e => {
-    let file = e.target.files[0];
-    let video = document.createElement("video");
-    video.preload = "metadata";
-    video.onloadedmetadata = function() {
-        if(video.duration > 180) return alert("Máx 3 minutos");
-        uploadVideo(file);
-    };
-    video.src = URL.createObjectURL(file);
-};
+tocar(feed[index])
+
+}
+
+/* UPLOAD */
+
+btnUpload.onclick=()=>{
+
+videoInput.click()
+
+}
+
+videoInput.onchange=e=>{
+
+let file=e.target.files[0]
+
+let video=document.createElement("video")
+
+video.preload="metadata"
+
+video.onloadedmetadata=function(){
+
+if(video.duration>180){
+
+alert("Máx 3 minutos")
+
+return
+
+}
+
+uploadVideo(file)
+
+}
+
+video.src=URL.createObjectURL(file)
+
+}
 
 function uploadVideo(file){
-    let ref = storage.ref("videos/" + Date.now() + ".mp4");
-    ref.put(file).then(s => {
-        s.ref.getDownloadURL().then(url => {
-            dbVideos.push({ usuario: perfil.nome, url: url, tempo: Date.now() });
-            alert("Vídeo enviado!");
-        });
-    });
+
+let ref=storage.ref("videos/"+Date.now()+".mp4")
+
+ref.put(file).then(s=>{
+
+s.ref.getDownloadURL().then(url=>{
+
+dbVideos.push({
+
+usuario:perfil.nome,
+url:url,
+tempo:Date.now()
+
+})
+
+})
+
+})
+
 }
 
 /* LIKE */
-btnCurtir.onclick = () => {
-    if(!feed[index]) return;
-    dbLikes.push({ usuario: perfil.nome, video: feed[index].url, tempo: Date.now() });
-    if(navigator.vibrate) navigator.vibrate(100);
-    btnCurtir.style.color = "#ff4d4d";
-    setTimeout(() => btnCurtir.style.color = "#accent", 1000);
-};
+
+btnCurtir.onclick=()=>{
+
+let videoAtual = feed[index]
+
+if(!videoAtual) return
+
+dbLikes.push({
+
+usuario:perfil.nome,
+video:videoAtual.url,
+tempo:Date.now()
+
+})
+
+}
+
 </script>
+
 </body>
 </html>
