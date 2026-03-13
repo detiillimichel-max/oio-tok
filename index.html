@@ -266,6 +266,12 @@ function toggleMenuPlus() {
         setTimeout(() => menu.style.display = 'none', 500);
     }
 }
+        // Comando para limpar o visual da explosão
+document.querySelectorAll('.app-icon').forEach(icon => {
+    icon.style.boxShadow = "none"; 
+    icon.style.border = "1px solid rgba(255,255,255,0.2)";
+});
+        
 
 // 3. Conecta com o seu botão "+"
 // Procura o botão que tem o símbolo de "+" e adiciona o clique
