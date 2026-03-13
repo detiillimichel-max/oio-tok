@@ -3,177 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OIO ONE - LIVE</title>
+    <title>OIO ONE - PROFUNDIDADE</title>
     <style>
         :root { --accent: #00e5ff; --glass: rgba(255, 255, 255, 0.1); }
         * { margin:0; padding:0; box-sizing: border-box; }
         body, html { background:#000; height:100vh; width:100vw; overflow:hidden; position:fixed; font-family: sans-serif; color: #fff; }
         
-        video { position:absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: 1; background: #000; }
+        video { position:absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: 1; }
 
         /* HEADER */
-        #userHeader {
-            position: absolute; top: 20px; left: 20px; z-index: 50;
-            display: flex; align-items: center; gap: 10px;
-            background: rgba(0,0,0,0.5); padding: 5px 15px 5px 5px;
-            border-radius: 30px; backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        .user-mini-photo { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--accent); background-size: cover; background-position: center; background-color: #222; display: flex; align-items: center; justify-content: center; }
+        #userHeader { position: absolute; top: 20px; left: 20px; z-index: 50; display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 30px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        .user-mini-photo { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--accent); background: #222; }
 
-        /* TELAS SALTO QUÂNTICO */
+        /* GAVETA DE CONTATOS (CAMADA DE ESCOLHA) */
+        #lista-contatos { 
+            position: fixed; bottom: -60%; left: 0; width: 100%; height: 60%;
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(25px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2); border-radius: 30px 30px 0 0;
+            z-index: 900; transition: bottom 0.5s cubic-bezier(0.22, 1, 0.36, 1); padding: 20px;
+        }
+        #lista-contatos.open { bottom: 0; }
+        .contato-card { display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 20px; margin-bottom: 10px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
+        .handle { width: 40px; height: 4px; background: rgba(255,255,255,0.3); border-radius: 10px; margin: 0 auto 20px; }
+
+        /* TELA DE CHAT (SALTO QUÂNTICO) */
         section { 
-            display:none; position:fixed; inset:0; z-index:80; background:rgba(0,0,0,0.9);
-            flex-direction:column; transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-            transform: scale(0.2); opacity:0; filter: blur(15px);
+            display:none; position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,0.95);
+            flex-direction:column; transition: 0.5s; transform: scale(0.8); opacity:0;
         }
-        section.active { display:flex; transform:scale(1); opacity:1; filter:blur(0); }
+        section.active { display:flex; transform:scale(1); opacity:1; }
 
-        /* CHAT REALTIME */
-        #chat-container { flex:1; width:100%; overflow-y:auto; padding:80px 20px 100px; display:flex; flex-direction:column; gap:15px; }
-        .msg { max-width: 80%; padding:12px; border-radius:15px; font-size:14px; line-height:1.4; position:relative; }
-        .msg.sent { align-self: flex-end; background: var(--accent); color:#000; border-bottom-right-radius: 2px; }
-        .msg.received { align-self: flex-start; background: rgba(255,255,255,0.1); color:#fff; border-bottom-left-radius: 2px; border: 1px solid rgba(255,255,255,0.1); }
-        .msg-info { font-size: 10px; opacity: 0.7; margin-bottom: 4px; display: block; }
+        #chat-container { flex:1; overflow-y:auto; padding:100px 20px; display:flex; flex-direction:column; gap:10px; }
+        .msg { max-width: 80%; padding:12px; border-radius:18px; font-size:14px; }
+        .msg.sent { align-self: flex-end; background: var(--accent); color:#000; }
+        .msg.received { align-self: flex-start; background: rgba(255,255,255,0.1); }
 
-        .chat-input-area { position:absolute; bottom:20px; width:90%; left:5%; display:flex; gap:10px; background:rgba(255,255,255,0.05); padding:10px; border-radius:30px; backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.1); }
-        .chat-input-area input { flex:1; background:none; border:none; color:#fff; outline:none; padding-left:10px; }
-        .btn-send { background:var(--accent); border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+        /* INPUT AREA COMPLETA */
+        .chat-input-area { 
+            position:absolute; bottom:25px; width:94%; left:3%; display:flex; align-items:center; gap:8px; 
+            background:rgba(255,255,255,0.1); padding:8px 15px; border-radius:30px; backdrop-filter:blur(20px);
+        }
+        .chat-input-area input { flex:1; background:none; border:none; color:#fff; outline:none; height:40px; }
+        .icon-btn { font-size: 20px; cursor: pointer; opacity: 0.8; }
+        .btn-send { background:var(--accent); border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; }
 
-        /* HUD */
-        .hud { position:absolute; inset:0; z-index:10; pointer-events:none; display:flex; flex-direction:column; justify-content:flex-end; padding:25px; }
-        .side { position:absolute; right:20px; bottom:50px; display:flex; flex-direction:column; gap:20px; pointer-events:auto; }
-        .btn-main { width:65px; height:65px; border-radius:50%; background:var(--accent); color:#000; font-size:35px; font-weight:bold; border:none; box-shadow: 0 0 20px rgba(0,229,255,0.4); }
-        .btn-nav { width:50px; height:50px; border-radius:50%; background:var(--glass); color:#fff; border:1px solid rgba(255,255,255,0.2); backdrop-filter:blur(10px); }
-
-        /* MENU EXPLOSIVO */
-        #menu-explosivo { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(15px); z-index:999; justify-content:center; align-items:center; }
-        .app-icon { position:absolute; transition:0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform:scale(0); opacity:0; width:75px; height:75px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:20px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:12px; }
     </style>
 </head>
 <body>
 
     <div id="userHeader">
-        <div class="user-mini-photo" id="miniPhoto">👤</div>
-        <span id="userNameTop">Visitante</span>
+        <div class="user-mini-photo" id="miniPhoto"></div>
+        <span id="userNameTop">Michel</span>
     </div>
 
     <video id="v" loop playsinline autoplay></video>
 
-    <section id="chat">
+    <div id="lista-contatos">
+        <div class="handle"></div>
+        <h3 style="margin-bottom:20px; text-align:center;">Conexões Reais</h3>
+        <div class="contato-card" onclick="abrirConversa('Família')">
+            <div class="user-mini-photo"></div>
+            <div><strong>Família</strong><br><small>Toque para conversar</small></div>
+        </div>
+        <div class="contato-card" onclick="abrirConversa('Amigos')">
+            <div class="user-mini-photo"></div>
+            <div><strong>Amigos</strong><br><small>Online agora</small></div>
+        </div>
+    </div>
+
+    <section id="chat-vibe">
+        <div style="padding:40px 20px 10px; border-bottom:1px solid var(--glass); display:flex; justify-content:space-between;">
+            <h2 id="chatNome">Chat</h2>
+            <button onclick="fecharChat()" style="background:none; border:none; color:#fff; font-size:20px;">✕</button>
+        </div>
         <div id="chat-container"></div>
         <div class="chat-input-area">
-            <input type="text" id="msgInput" placeholder="Sua vibe...">
-            <button class="btn-send" onclick="enviarMensagem()">🚀</button>
+            <span class="icon-btn">📎</span> <input type="text" id="msgInput" placeholder="Sua vibe...">
+            <span class="icon-btn">🎙️</span> <button class="btn-send" onclick="enviarMensagem()">✈️</button>
         </div>
-        <button onclick="showPage('')" style="position:absolute; top:30px; right:20px; background:none; border:none; color:#fff; font-size:20px;">✕</button>
     </section>
-
-    <section id="videos">
-        <h2 style="color:var(--accent)">FEED OIO</h2>
-        <button onclick="showPage('')" style="margin-top:20px; color:#fff;">Voltar</button>
-    </section>
-
-    <div class="hud">
-        <div class="side">
-            <button class="btn-nav" onclick="proximo()">❯</button>
-            <button class="btn-main" onclick="toggleMenuPlus()">+</button>
-            <button class="btn-nav" onclick="showPage('chat')">💬</button>
-        </div>
-    </div>
-
-    <div id="menu-explosivo">
-        <div style="position:relative; width:300px; height:300px; display:flex; justify-content:center; align-items:center;">
-            <div class="app-icon" onclick="showPage('chat')">💬<br>Vibe</div>
-            <div class="app-icon" onclick="window.location.href='https://google.com'">🔍<br>Google</div>
-            <div class="app-icon" onclick="window.location.href='https://youtube.com'">📺<br>YouTube</div>
-            <div class="app-icon" onclick="showPage('videos')">🎬<br>Vídeos</div>
-        </div>
-    </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <script>
-        // CONFIGURAÇÃO FIREBASE (Substitua pelos seus dados do console)
         const firebaseConfig = {
-            apiKey: "SUA_API_KEY",
+            apiKey: "AIzaSyAWL1XRR8JK-J5Qk5DSIKmBl4ZYMZw1R4I",
             databaseURL: "https://vibe-app-bbba2-default-rtdb.firebaseio.com/",
-            projectId: "vibe-app-bbba2",
-            storageBucket: "vibe-app-bbba2.appspot.com",
-            messagingSenderId: "SEU_ID",
-            appId: "SEU_APP_ID"
+            projectId: "vibe-app-bbba2"
         };
-        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        const meuNome = "Michel";
 
-        // IDENTIDADE
-        let meuNome = JSON.parse(localStorage.getItem('oio_id'))?.nome || "Visitante";
-        document.getElementById('userNameTop').innerText = meuNome;
-
-        // SALTO QUÂNTICO
-        window.showPage = (id) => {
-            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-            const target = document.getElementById(id);
-            if(target) {
-                target.classList.add('active');
-                if(id === 'chat') carregarMensagens();
-            }
-        };
-
-        // GESTOS
+        // GESTO: CIMA ABRE CONTATOS
         let sy = 0;
         document.addEventListener('touchstart', e => sy = e.touches[0].clientY);
         document.addEventListener('touchend', e => {
             let dy = sy - e.changedTouches[0].clientY;
-            if (dy > 80) showPage('chat');
-            else if (dy < -80) showPage('videos');
+            if (dy > 80) document.getElementById('lista-contatos').classList.add('open');
+            if (dy < -80) document.getElementById('lista-contatos').classList.remove('open');
         });
 
-        // LÓGICA DO CHAT
-        function enviarMensagem() {
-            const txt = document.getElementById('msgInput').value;
-            if(!txt) return;
-            db.ref('mensagens').push({
-                nome: meuNome,
-                texto: txt,
-                timestamp: Date.now()
-            });
-            document.getElementById('msgInput').value = "";
+        function abrirConversa(nome) {
+            document.getElementById('chatNome').innerText = nome;
+            document.getElementById('chat-vibe').classList.add('active');
+            carregarMensagens(nome);
         }
 
-        function carregarMensagens() {
-            db.ref('mensagens').limitToLast(20).on('value', snapshot => {
+        function fecharChat() { document.getElementById('chat-vibe').classList.remove('active'); }
+
+        function enviarMensagem() {
+            const input = document.getElementById('msgInput');
+            const sala = document.getElementById('chatNome').innerText;
+            if(!input.value) return;
+            db.ref('conversas/' + sala).push({
+                nome: meuNome,
+                texto: input.value,
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            });
+            input.value = "";
+        }
+
+        function carregarMensagens(sala) {
+            db.ref('conversas/' + sala).on('value', snap => {
                 const container = document.getElementById('chat-container');
                 container.innerHTML = "";
-                snapshot.forEach(child => {
-                    const m = child.val();
-                    const div = document.createElement('div');
-                    div.className = `msg ${m.nome === meuNome ? 'sent' : 'received'}`;
-                    div.innerHTML = `<span class="msg-info">${m.nome}</span>${m.texto}`;
-                    container.appendChild(div);
+                snap.forEach(msg => {
+                    const m = msg.val();
+                    const d = document.createElement('div');
+                    d.className = `msg ${m.nome === meuNome ? 'sent' : 'received'}`;
+                    d.innerHTML = `<small style="font-size:9px; display:block; opacity:0.6;">${m.nome} • ${m.time}</small>${m.texto}`;
+                    container.appendChild(d);
                 });
                 container.scrollTop = container.scrollHeight;
             });
         }
-
-        // MENU EXPLOSIVO
-        window.toggleMenuPlus = () => {
-            const m = document.getElementById('menu-explosivo');
-            const icons = document.querySelectorAll('.app-icon');
-            if(m.style.display === 'none' || m.style.display === ''){
-                m.style.display = 'flex';
-                const pos = [[0,-115], [115,0], [0,115], [-115,0]];
-                setTimeout(() => icons.forEach((icon, i) => {
-                    icon.style.transform = `translate(${pos[i][0]}px, ${pos[i][1]}px) scale(1)`;
-                    icon.style.opacity = "1";
-                }), 50);
-            } else {
-                icons.forEach(i => i.style.transform = 'scale(0)');
-                setTimeout(() => m.style.display = 'none', 400);
-            }
-        };
     </script>
 </body>
 </html>
