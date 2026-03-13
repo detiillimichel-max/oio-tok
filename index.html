@@ -243,34 +243,30 @@ const menuHTML = `
 document.body.insertAdjacentHTML('beforeend', menuHTML);
 
 // 2. Função que faz a EXPLOSÃO
-function toggleMenuPlus() {
+
+        function toggleMenuPlus() {
     const menu = document.getElementById('menu-explosivo');
     const icons = document.querySelectorAll('.app-icon');
     
     if (menu.style.display === 'none') {
         menu.style.display = 'flex';
-        // Ângulos para a explosão circular
-        const posicoes = [[0,-100], [100,0], [0,100], [-100,0]]; 
+        const posicoes = [[0,-110], [110,0], [0,110], [-110,0]]; 
         
         setTimeout(() => {
             icons.forEach((icon, i) => {
-                icon.style.transform = `translate(${posicoes[i][0]}px, ${posicoes[i][1]}px) scale(1.2)`;
-                icon.style.background = 'var(--glass)';
-                icon.style.padding = '15px';
-                icon.style.borderRadius = '15px';
-                icon.style.textAlign = 'center';
+                // Correção da Explosão Premium
+                icon.style.transform = `translate(${posicoes[i][0]}px, ${posicoes[i][1]}px) scale(1)`;
+                icon.style.opacity = "1";
+                icon.style.boxShadow = "none";
+                icon.style.border = "1px solid rgba(255,255,255,0.2)";
+                icon.style.background = "rgba(255,255,255,0.1)";
             });
         }, 50);
     } else {
         icons.forEach(icon => icon.style.transform = 'scale(0)');
         setTimeout(() => menu.style.display = 'none', 500);
     }
-}
-        // Comando para limpar o visual da explosão
-document.querySelectorAll('.app-icon').forEach(icon => {
-    icon.style.boxShadow = "none"; 
-    icon.style.border = "1px solid rgba(255,255,255,0.2)";
-});
+        }
         
 
 // 3. Conecta com o seu botão "+"
