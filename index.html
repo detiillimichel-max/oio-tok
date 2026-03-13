@@ -25,6 +25,7 @@
             display: flex; align-items: center; justify-content: center; font-size: 18px;
         }
 
+        /* HUD E BOTÕES */
         .hud { position:absolute; inset:0; z-index:10; pointer-events:none; display:flex; flex-direction:column; justify-content:flex-end; padding:25px; }
         .side { position:absolute; right:20px; bottom:50px; display:flex; flex-direction:column; gap:20px; pointer-events:auto; }
         
@@ -39,6 +40,41 @@
         .profile-photo-big { width: 130px; height: 130px; border-radius: 50%; border: 3px solid var(--accent); background-size: cover; background-position: center; background-color: #111; display: flex; align-items: center; justify-content: center; font-size: 50px; cursor: pointer; }
         .input-profile { width: 100%; max-width: 300px; padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; text-align: center; }
         .btn-save { padding: 12px 40px; border-radius: 30px; border: none; background: var(--accent); color: #000; font-weight: bold; cursor: pointer; }
+
+        /* MENU EXPLOSIVO PREMIUM */
+        #menu-explosivo { 
+            display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+            background:rgba(0,0,0,0.8); backdrop-filter:blur(15px); z-index:999; 
+            justify-content:center; align-items:center; 
+        }
+        #apps-container { position:relative; width:300px; height:300px; display:flex; justify-content:center; align-items:center; }
+        
+        .app-icon { 
+            position:absolute; transition:all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            transform:scale(0); opacity:0; width:70px; height:70px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px; display:flex; flex-direction:column; align-items:center;
+            justify-content:center; font-size:12px; color:white; text-align:center;
+        }
+
+        /* GAVETA TOUCH */
+        .gaveta-glass {
+            position: fixed; bottom: -35%; left: 0; width: 100%; height: 35%;
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px 30px 0 0;
+            z-index: 900; transition: bottom 0.5s ease; padding: 15px; text-align: center;
+        }
+        .handle { width: 40px; height: 5px; background: rgba(255, 255, 255, 0.3); border-radius: 10px; margin: 0 auto 20px; }
+        .gaveta-glass.open { bottom: 0; }
+
+        /* SEÇÕES DE CONTEÚDO (SALTO QUÂNTICO) */
+        section { 
+            display:none; position:fixed; inset:0; z-index:80; background:#000;
+            flex-direction:column; align-items:center; justify-content:center;
+            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            transform: scale(0.2); opacity:0; filter: blur(10px);
+        }
+        section.active { display:flex; transform:scale(1); opacity:1; filter:blur(0); }
     </style>
 </head>
 <body>
@@ -50,11 +86,11 @@
 
     <video id="v" loop playsinline autoplay></video>
 
+    <section id="chat"><h2>Mensagens Real</h2><button onclick="showPage('')">Voltar</button></section>
+    <section id="videos"><h2>Feed de Vídeos</h2><button onclick="showPage('')">Voltar</button></section>
+
     <div id="perfilPanel">
-        <label class="profile-photo-big" id="photoDisplay">
-            👤
-            <input type="file" accept="image/*" style="display:none" onchange="processarFoto(this)">
-        </label>
+        <label class="profile-photo-big" id="photoDisplay">👤<input type="file" accept="image/*" style="display:none" onchange="processarFoto(this)"></label>
         <input type="text" class="input-profile" id="p_nome" placeholder="Digite seu Nome">
         <input type="password" class="input-profile" id="p_senha" placeholder="Crie uma Senha">
         <button class="btn-save" onclick="salvarTudo()">SALVAR NO DISPOSITIVO</button>
@@ -64,84 +100,100 @@
     <div class="hud">
         <div class="side">
             <button class="btn-nav" onclick="togglePerfil()">⚙️</button>
-            <label class="btn-main">+<input type="file" accept="video/*" multiple style="display:none" onchange="armazenarVideos(this)"></label>
+            <button class="btn-main" id="btnPlus" onclick="toggleMenuPlus()">+</button>
             <button class="btn-nav" onclick="proximo()">❯</button>
         </div>
     </div>
 
-    <script type="module">
+    <div id="menu-explosivo">
+        <div id="apps-container">
+            <div class="app-icon" onclick="showPage('chat')">💬<br>Vibe</div>
+            <div class="app-icon" onclick="window.location.href='https://google.com'">🔍<br>Google</div>
+            <div class="app-icon" onclick="window.location.href='https://youtube.com'">📺<br>YouTube</div>
+            <div class="app-icon" onclick="showPage('videos')">🎬<br>Vídeos</div>
+        </div>
+    </div>
+
+    <div id="gaveta-contatos" class="gaveta-glass">
+        <div class="handle"></div>
+        <div style="color: white; padding: 10px;">Contatos OIO ONE</div>
+    </div>
+
+    <script>
         const video = document.getElementById('v');
         let playlist = JSON.parse(localStorage.getItem('oio_playlist')) || [];
         let index = 0;
 
-        // INICIALIZAÇÃO
         window.onload = () => {
             const perfil = JSON.parse(localStorage.getItem('oio_id'));
             if(perfil) {
                 document.getElementById('p_nome').value = perfil.nome;
                 document.getElementById('userNameTop').innerText = perfil.nome;
-                if(perfil.foto) {
-                    atualizarVisualFoto(perfil.foto);
-                }
-            }
-            if(playlist.length > 0) tocar(0);
-        };
-
-        // MEMÓRIA DE VÍDEOS
-        window.armazenarVideos = (input) => {
-            const files = Array.from(input.files);
-            files.forEach(file => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    playlist.push(e.target.result);
-                    try {
-                        localStorage.setItem('oio_playlist', JSON.stringify(playlist));
-                    } catch(err) {
-                        console.log("Memória cheia, salvando apenas na sessão.");
-                    }
-                    if(playlist.length === files.length) tocar(playlist.length - files.length);
-                };
-                reader.readAsDataURL(file);
-            });
-        };
-
-        window.tocar = (idx) => {
-            if (playlist[idx]) {
-                video.src = playlist[idx];
-                video.play();
-                index = idx;
+                if(perfil.foto) atualizarVisualFoto(perfil.foto);
             }
         };
 
-        window.proximo = () => {
-            index = (index + 1) % playlist.length;
-            tocar(index);
+        // CONTROLE DE VÍDEO
+        window.tocar = (idx) => { if (playlist[idx]) { video.src = playlist[idx]; video.play(); index = idx; } };
+        window.proximo = () => { if(playlist.length > 0) { index = (index + 1) % playlist.length; tocar(index); } };
+
+        // SALTO QUÂNTICO
+        window.showPage = (pageId) => {
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(pageId);
+            if(target) {
+                target.classList.add('active');
+                if (navigator.vibrate) navigator.vibrate(20);
+                document.getElementById('menu-explosivo').style.display = 'none';
+            }
         };
 
-        // GESTOS
-        let ty = 0;
-        document.addEventListener('touchstart', e => ty = e.touches[0].clientY);
+        // MENU EXPLOSIVO
+        window.toggleMenuPlus = () => {
+            const menu = document.getElementById('menu-explosivo');
+            const icons = document.querySelectorAll('.app-icon');
+            if (menu.style.display === 'none' || menu.style.display === '') {
+                menu.style.display = 'flex';
+                const pos = [[0,-115], [115,0], [0,115], [-115,0]];
+                setTimeout(() => {
+                    icons.forEach((icon, i) => {
+                        icon.style.transform = `translate(${pos[i][0]}px, ${pos[i][1]}px) scale(1.1)`;
+                        icon.style.opacity = "1";
+                    });
+                }, 50);
+            } else {
+                icons.forEach(icon => { icon.style.transform = 'scale(0)'; icon.style.opacity = '0'; });
+                setTimeout(() => menu.style.display = 'none', 400);
+            }
+        };
+
+        // GESTOS (TOUCH GAVETA E VÍDEO)
+        let sy = 0;
+        document.addEventListener('touchstart', e => sy = e.touches[0].clientY);
         document.addEventListener('touchend', e => {
-            if (ty - e.changedTouches[0].clientY > 100) proximo();
-            else if (Math.abs(ty - e.changedTouches[0].clientY) < 10 && !e.target.closest('button, label')) {
+            let dy = sy - e.changedTouches[0].clientY;
+            const gaveta = document.getElementById('gaveta-contatos');
+            
+            if (dy > 100) { // Deslize para CIMA
+                gaveta.classList.add('open');
+                if (navigator.vibrate) navigator.vibrate(15);
+            } else if (dy < -100) { // Deslize para BAIXO
+                gaveta.classList.remove('open');
+            } else if (Math.abs(dy) < 10 && !e.target.closest('button, label, .app-icon')) {
                 video.paused ? video.play() : video.pause();
             }
         });
 
-        // PERFIL E IDENTIDADE
+        // IDENTIDADE
         window.togglePerfil = () => {
             const p = document.getElementById('perfilPanel');
             p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
         };
 
         window.processarFoto = (input) => {
-            const file = input.files[0];
             const reader = new FileReader();
-            reader.onload = (e) => {
-                window.fotoBase64 = e.target.result;
-                atualizarVisualFoto(window.fotoBase64);
-            };
-            reader.readAsDataURL(file);
+            reader.onload = (e) => { window.fotoBase64 = e.target.result; atualizarVisualFoto(window.fotoBase64); };
+            reader.readAsDataURL(input.files[0]);
         };
 
         function atualizarVisualFoto(url) {
@@ -153,140 +205,12 @@
 
         window.salvarTudo = () => {
             const nome = document.getElementById('p_nome').value || "Michel";
-            const id = { nome: nome, foto: window.fotoBase64 || JSON.parse(localStorage.getItem('oio_id'))?.foto || "" };
+            const id = { nome: nome, foto: window.fotoBase64 || "" };
             localStorage.setItem('oio_id', JSON.stringify(id));
             document.getElementById('userNameTop').innerText = nome;
-            alert("Identidade salva com sucesso!");
+            alert("OIO ONE: Identidade Atualizada!");
             togglePerfil();
         };
-
-        /* PREPARAÇÃO FIREBASE STORAGE (HIBERNADO)
-        async function enviarAoFirebase(file) {
-            // Este bloco será ativado quando o cartão for vinculado
-            // const sRef = ref(storage, 'vibes/' + file.name);
-            // await uploadBytes(sRef, file);
-        }
-        /* --- COMANDO DO SALTO QUÂNTICO (OIO ONE) --- */
-function showPage(pageId) {
-    // 1. Fecha todas as telas e tira o brilho
-    document.querySelectorAll('section').forEach(section => {
-        section.classList.remove('active');
-        section.classList.remove('acoplado');
-    });
-
-    // 2. Localiza a tela que você quer abrir
-    const targetPage = document.getElementById(pageId);
-    if (targetPage) {
-        // 3. Ativa a tela (O CSS faz ela 'saltar' do fundo)
-        targetPage.classList.add('active');
-        
-        // 4. Faz a tela piscar (Módulo de Acoplamento)
-        setTimeout(() => {
-            targetPage.classList.add('acoplado');
-        }, 50);
-
-        // 5. Vibração Sensorial (DNA Michel Detilli)
-        if (navigator.vibrate) {
-            navigator.vibrate(20); 
-        }
-    }
-
-    // 6. Deixa o botão do menu aceso na cor certa
-    document.querySelectorAll('.bottom-nav button').forEach(btn => {
-        btn.classList.remove('active');
-        // Se o botão tiver o comando para abrir essa página, ele acende
-        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(pageId)) {
-            btn.classList.add('active');
-        }
-    });
-}/* --- SENSOR DE GESTOS OIO ONE --- */
-let touchstartY = 0;
-let touchendY = 0;
-
-// Captura onde o toque começa
-document.addEventListener('touchstart', e => {
-    touchstartY = e.changedTouches[0].screenY;
-}, false);
-
-// Captura onde o toque termina e decide a ação
-document.addEventListener('touchend', e => {
-    touchendY = e.changedTouches[0].screenY;
-    handleGesture();
-}, false);
-
-function handleGesture() {
-    const deslizeMinimo = 50; // Sensibilidade do toque
-
-    // Se deslizou para CIMA (abre o chat)
-    if (touchendY < touchstartY - deslizeMinimo) {
-        console.log("Deslizou para cima: Abrindo Chat");
-        showPage('chat'); // Use o ID real da sua section de chat
-    }
-
-    // Se deslizou para BAIXO (abre os vídeos)
-    if (touchendY > touchstartY + deslizeMinimo) {
-        console.log("Deslizou para baixo: Abrindo Vídeos");
-        showPage('videos'); // Use o ID real da sua section de vídeos
-    }
-}
-        /* --- MENU EXPLOSIVO OIO ONE --- */
-// 1. Cria o HTML do Menu dinamicamente para você não ter que subir o código
-const menuHTML = `
-<div id="menu-explosivo" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); z-index:999; justify-content:center; align-items:center;">
-    <div id="apps-container" style="position:relative; width:300px; height:300px; display:flex; justify-content:center; align-items:center;">
-        <div class="app-icon" onclick="showPage('chat')" style="position:absolute; transition:all 0.5s; transform:scale(0);">💬<br>Vibe</div>
-        <div class="app-icon" onclick="window.location.href='https://google.com'" style="position:absolute; transition:all 0.5s; transform:scale(0);">🔍<br>Google</div>
-        <div class="app-icon" onclick="window.location.href='https://youtube.com'" style="position:absolute; transition:all 0.5s; transform:scale(0);">📺<br>YouTube</div>
-        <div class="app-icon" onclick="showPage('videos')" style="position:absolute; transition:all 0.5s; transform:scale(0);">🎬<br>Vídeos</div>
-    </div>
-</div>`;
-document.body.insertAdjacentHTML('beforeend', menuHTML);
-
-// 2. Função que faz a EXPLOSÃO
-
-        function toggleMenuPlus() {
-    const menu = document.getElementById('menu-explosivo');
-    const icons = document.querySelectorAll('.app-icon');
-    
-    if (menu.style.display === 'none') {
-        menu.style.display = 'flex';
-        const posicoes = [[0,-110], [110,0], [0,110], [-110,0]]; 
-        
-        setTimeout(() => {
-            icons.forEach((icon, i) => {
-                // Correção da Explosão Premium
-                icon.style.transform = `translate(${posicoes[i][0]}px, ${posicoes[i][1]}px) scale(1)`;
-                icon.style.opacity = "1";
-                icon.style.boxShadow = "none";
-                icon.style.border = "1px solid rgba(255,255,255,0.2)";
-                icon.style.background = "rgba(255,255,255,0.1)";
-            });
-        }, 50);
-    } else {
-        icons.forEach(icon => icon.style.transform = 'scale(0)');
-        setTimeout(() => menu.style.display = 'none', 500);
-    }
-        }
-        
-
-// 3. Conecta com o seu botão "+"
-// Procura o botão que tem o símbolo de "+" e adiciona o clique
-document.querySelector('button:has(svg), .btn-plus, #addBtn').onclick = toggleMenuPlus;
-        
-        
     </script>
-<div id="menu-explosivo" style="display:none;">
-    <div id="apps-container">
-        <div class="app-icon" onclick="showPage('chat')">💬<br>Vibe</div>
-        <div class="app-icon" onclick="window.location.href='https://google.com'">🔍<br>Google</div>
-        <div class="app-icon" onclick="window.location.href='https://youtube.com'">📺<br>YouTube</div>
-        <div class="app-icon" onclick="showPage('videos')">🎬<br>Vídeos</div>
-    </div>
-</div>
-
-<div id="gaveta-contatos" class="gaveta-glass">
-    <div class="handle"></div>
-    <div style="color: white; padding: 10px;">Contatos</div>
-</div>
 </body>
 </html>
