@@ -3,40 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OIO ONE - TOUCH</title>
+    <title>OIO ONE - GESTOS</title>
     <style>
-        :root { --accent: #00e5ff; }
+        :root { --accent: #00e5ff; --glass: rgba(255, 255, 255, 0.1); }
         * { margin:0; padding:0; box-sizing: border-box; }
-        body, html { background:#000; height:100vh; width:100vw; overflow:hidden; position:fixed; font-family: sans-serif; }
+        body, html { background:#000; height:100vh; width:100vw; overflow:hidden; position:fixed; font-family: sans-serif; color: #fff; }
         
+        /* PLAYER MASTER */
         video { position:absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: 1; }
 
-        /* EFEITO TOUCH */
-        .touch-ripple {
-            position: absolute; border-radius: 50%; background: rgba(0, 229, 255, 0.4);
-            transform: scale(0); animation: ripple 0.6s linear; pointer-events: none; z-index: 20;
-        }
-        @keyframes ripple { to { transform: scale(4); opacity: 0; } }
-
+        /* HUD MINIMALISTA */
         .hud { position:absolute; inset:0; z-index:10; pointer-events:none; display:flex; flex-direction:column; justify-content:flex-end; padding:25px; }
         .side { position:absolute; right:20px; bottom:50px; display:flex; flex-direction:column; gap:20px; pointer-events:auto; }
         
         .btn-main { width:65px; height:65px; border-radius:50%; background:var(--accent); color:#000; font-size:35px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; box-shadow: 0 0 25px rgba(0,229,255,0.5); }
-        .btn-link { width:50px; height:50px; border-radius:50%; background:rgba(255,255,255,0.1); color:#fff; border:1px solid var(--accent); display:flex; align-items:center; justify-content:center; font-size:20px; backdrop-filter:blur(10px); cursor:pointer; }
+        .btn-nav { width:50px; height:50px; border-radius:50%; background:var(--glass); color:#fff; border:1px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:20px; backdrop-filter:blur(10px); cursor:pointer; }
+
+        /* EFEITO TOUCH */
+        .touch-ripple { position:absolute; border-radius:50%; background:rgba(0, 229, 255, 0.3); transform:scale(0); animation:ripple 0.5s linear; pointer-events:none; z-index:20; }
+        @keyframes ripple { to { transform:scale(4); opacity:0; } }
+
+        /* PAINEL DE PERFIL (GHOST) */
+        #perfilPanel { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px);
+            z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 40px;
+        }
+        
+        .profile-photo { 
+            width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--accent);
+            background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center;
+            font-size: 50px; color: rgba(255,255,255,0.3); cursor: pointer; background-size: cover; background-position: center;
+        }
+
+        .input-profile { 
+            width: 100%; max-width: 300px; padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none;
+        }
+        .input-profile:focus { border-color: var(--accent); }
+        
+        .btn-save { padding: 10px 30px; border-radius: 10px; border: none; background: var(--accent); color: #000; font-weight: bold; cursor: pointer; }
+
     </style>
 </head>
-<body onmousedown="createRipple(event)">
+<body>
 
     <video id="v" loop playsinline autoplay></video>
 
+    <div id="perfilPanel">
+        <label class="profile-photo" id="photoDisplay">
+            👤
+            <input type="file" accept="image/*" style="display:none" onchange="loadPhoto(this)">
+        </label>
+        <input type="text" class="input-profile" id="p_nome" placeholder="Nome de usuário...">
+        <input type="password" class="input-profile" id="p_senha" placeholder="Senha...">
+        <div style="display:flex; gap:10px;">
+            <button class="btn-save" onclick="togglePerfil()">Salvar</button>
+            <button class="btn-save" style="background:#ff3366" onclick="togglePerfil()">Sair</button>
+        </div>
+    </div>
+
     <div class="hud">
         <div class="side">
+            <button class="btn-nav" onclick="togglePerfil()">⚙️</button>
+            
             <label class="btn-main">
                 +
                 <input type="file" accept="video/*" multiple style="display:none" onchange="subirGaleria(this)">
             </label>
-            <button class="btn-link" onclick="usarURL()">🔗</button>
-            <button class="btn-link" style="font-size:15px" onclick="proximo()">PRÓX</button>
+            <button class="btn-nav" onclick="usarURL()">🔗</button>
         </div>
     </div>
 
@@ -56,11 +90,12 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const dbRef = ref(db, 'vibe_sync_master');
+        const dbRef = ref(db, 'vibe_touch_gestos');
         const video = document.getElementById('v');
         let playlist = [];
         let index = 0;
 
+        // Sincronia Realtime
         onValue(query(dbRef, limitToLast(1)), (snapshot) => {
             const data = snapshot.val();
             if (data) {
@@ -81,36 +116,85 @@
         };
 
         window.tocar = (idx) => {
+            if (idx < 0) idx = playlist.length - 1;
+            if (idx >= playlist.length) idx = 0;
             video.src = playlist[idx];
             video.play();
             index = idx;
         };
 
-        window.proximo = () => {
-            if(playlist.length > 0) {
-                index = (index + 1) % playlist.length;
-                tocar(index);
-            }
-        };
+        window.proximo = () => tocar(index + 1);
 
         window.usarURL = () => {
             const link = prompt("Cole o link MP4 do vídeo:");
             if (link) push(dbRef, link);
         };
 
-        // EFEITO TOUCH E PAUSA
-        window.createRipple = (event) => {
-            if (event.target.tagName === 'BUTTON' || event.target.tagName === 'LABEL') return;
+        // GESTOS DE SWIPE (DESLIZAR)
+        let ts_y = 0; // Touch Start Y
+        let ts_x = 0; // Touch Start X
+
+        document.addEventListener('touchstart', e => {
+            ts_y = e.touches[0].clientY;
+            ts_x = e.touches[0].clientX;
+        });
+
+        document.addEventListener('touchend', e => {
+            if (perfilPanel.style.display === 'flex') return; // Bloqueia swipe no perfil
+
+            let te_y = e.changedTouches[0].clientY;
+            let te_x = e.changedTouches[0].clientX;
             
+            // Distância do deslize
+            let dy = ts_y - te_y;
+            let dx = ts_x - te_x;
+
+            // Feedback Touch e Pausa (Toque rápido)
+            if (Math.abs(dy) < 30 && Math.abs(dx) < 30) {
+                // Se não clicou em botões, cria o ripple e pausa
+                if (!event.target.closest('button, label')) {
+                    createRipple(te_x, te_y);
+                    video.paused ? video.play() : video.pause();
+                }
+            } else {
+                // Deslize Vertical (Pular Vídeo)
+                if (Math.abs(dy) > Math.abs(dx) && dy > 100) { // Deslizou para cima
+                    proximo();
+                }
+            }
+        });
+
+        function createRipple(x, y) {
             const ripple = document.createElement("div");
             ripple.className = "touch-ripple";
-            ripple.style.left = `${event.clientX - 25}px`;
-            ripple.style.top = `${event.clientY - 25}px`;
+            ripple.style.left = `${x - 25}px`;
+            ripple.style.top = `${y - 25}px`;
             ripple.style.width = ripple.style.height = "50px";
             document.body.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 600);
+            setTimeout(() => ripple.remove(), 500);
+        }
 
-            video.paused ? video.play() : video.pause();
+        // FUNÇÕES DE PERFIL
+        const perfilPanel = document.getElementById('perfilPanel');
+        const photoDisplay = document.getElementById('photoDisplay');
+
+        window.togglePerfil = () => {
+            if (perfilPanel.style.display === 'flex') {
+                perfilPanel.style.display = 'none';
+                video.play(); // Continua o vídeo
+            } else {
+                perfilPanel.style.display = 'flex';
+                video.pause(); // Pausa o vídeo
+            }
+        };
+
+        window.loadPhoto = (input) => {
+            const file = input.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                photoDisplay.style.backgroundImage = `url(${url})`;
+                photoDisplay.innerText = ""; // Remove o ícone 👤
+            }
         };
     </script>
 </body>
