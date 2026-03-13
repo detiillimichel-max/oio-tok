@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OIO ONE - ID</title>
+    <title>OIO ONE - LIVE</title>
     <style>
         :root { --accent: #00e5ff; --glass: rgba(255, 255, 255, 0.1); }
         * { margin:0; padding:0; box-sizing: border-box; }
@@ -11,102 +11,79 @@
         
         video { position:absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: 1; background: #000; }
 
-        /* HEADER DE IDENTIDADE */
+        /* HEADER */
         #userHeader {
             position: absolute; top: 20px; left: 20px; z-index: 50;
             display: flex; align-items: center; gap: 10px;
             background: rgba(0,0,0,0.5); padding: 5px 15px 5px 5px;
             border-radius: 30px; backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2); transition: 0.3s;
+            border: 1px solid rgba(255,255,255,0.2);
         }
-        .user-mini-photo { 
-            width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--accent); 
-            background-size: cover; background-position: center; background-color: #222;
-            display: flex; align-items: center; justify-content: center; font-size: 18px;
-        }
+        .user-mini-photo { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--accent); background-size: cover; background-position: center; background-color: #222; display: flex; align-items: center; justify-content: center; }
 
-        /* HUD E BOTÕES */
-        .hud { position:absolute; inset:0; z-index:10; pointer-events:none; display:flex; flex-direction:column; justify-content:flex-end; padding:25px; }
-        .side { position:absolute; right:20px; bottom:50px; display:flex; flex-direction:column; gap:20px; pointer-events:auto; }
-        
-        .btn-main { width:65px; height:65px; border-radius:50%; background:var(--accent); color:#000; font-size:35px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; box-shadow: 0 0 25px rgba(0,229,255,0.5); }
-        .btn-nav { width:50px; height:50px; border-radius:50%; background:var(--glass); color:#fff; border: 1px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:20px; backdrop-filter:blur(10px); cursor:pointer; }
-
-        /* PAINEL DE PERFIL */
-        #perfilPanel { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(20px);
-            z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 40px;
-        }
-        .profile-photo-big { width: 130px; height: 130px; border-radius: 50%; border: 3px solid var(--accent); background-size: cover; background-position: center; background-color: #111; display: flex; align-items: center; justify-content: center; font-size: 50px; cursor: pointer; }
-        .input-profile { width: 100%; max-width: 300px; padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; text-align: center; }
-        .btn-save { padding: 12px 40px; border-radius: 30px; border: none; background: var(--accent); color: #000; font-weight: bold; cursor: pointer; }
-
-        /* MENU EXPLOSIVO PREMIUM */
-        #menu-explosivo { 
-            display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
-            background:rgba(0,0,0,0.8); backdrop-filter:blur(15px); z-index:999; 
-            justify-content:center; align-items:center; 
-        }
-        #apps-container { position:relative; width:300px; height:300px; display:flex; justify-content:center; align-items:center; }
-        
-        .app-icon { 
-            position:absolute; transition:all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            transform:scale(0); opacity:0; width:70px; height:70px;
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 20px; display:flex; flex-direction:column; align-items:center;
-            justify-content:center; font-size:12px; color:white; text-align:center;
-        }
-
-        /* GAVETA TOUCH */
-        .gaveta-glass {
-            position: fixed; bottom: -35%; left: 0; width: 100%; height: 35%;
-            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px 30px 0 0;
-            z-index: 900; transition: bottom 0.5s ease; padding: 15px; text-align: center;
-        }
-        .handle { width: 40px; height: 5px; background: rgba(255, 255, 255, 0.3); border-radius: 10px; margin: 0 auto 20px; }
-        .gaveta-glass.open { bottom: 0; }
-
-        /* SEÇÕES DE CONTEÚDO (SALTO QUÂNTICO) */
+        /* TELAS SALTO QUÂNTICO */
         section { 
-            display:none; position:fixed; inset:0; z-index:80; background:#000;
-            flex-direction:column; align-items:center; justify-content:center;
-            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-            transform: scale(0.2); opacity:0; filter: blur(10px);
+            display:none; position:fixed; inset:0; z-index:80; background:rgba(0,0,0,0.9);
+            flex-direction:column; transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            transform: scale(0.2); opacity:0; filter: blur(15px);
         }
         section.active { display:flex; transform:scale(1); opacity:1; filter:blur(0); }
+
+        /* CHAT REALTIME */
+        #chat-container { flex:1; width:100%; overflow-y:auto; padding:80px 20px 100px; display:flex; flex-direction:column; gap:15px; }
+        .msg { max-width: 80%; padding:12px; border-radius:15px; font-size:14px; line-height:1.4; position:relative; }
+        .msg.sent { align-self: flex-end; background: var(--accent); color:#000; border-bottom-right-radius: 2px; }
+        .msg.received { align-self: flex-start; background: rgba(255,255,255,0.1); color:#fff; border-bottom-left-radius: 2px; border: 1px solid rgba(255,255,255,0.1); }
+        .msg-info { font-size: 10px; opacity: 0.7; margin-bottom: 4px; display: block; }
+
+        .chat-input-area { position:absolute; bottom:20px; width:90%; left:5%; display:flex; gap:10px; background:rgba(255,255,255,0.05); padding:10px; border-radius:30px; backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.1); }
+        .chat-input-area input { flex:1; background:none; border:none; color:#fff; outline:none; padding-left:10px; }
+        .btn-send { background:var(--accent); border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+
+        /* HUD */
+        .hud { position:absolute; inset:0; z-index:10; pointer-events:none; display:flex; flex-direction:column; justify-content:flex-end; padding:25px; }
+        .side { position:absolute; right:20px; bottom:50px; display:flex; flex-direction:column; gap:20px; pointer-events:auto; }
+        .btn-main { width:65px; height:65px; border-radius:50%; background:var(--accent); color:#000; font-size:35px; font-weight:bold; border:none; box-shadow: 0 0 20px rgba(0,229,255,0.4); }
+        .btn-nav { width:50px; height:50px; border-radius:50%; background:var(--glass); color:#fff; border:1px solid rgba(255,255,255,0.2); backdrop-filter:blur(10px); }
+
+        /* MENU EXPLOSIVO */
+        #menu-explosivo { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(15px); z-index:999; justify-content:center; align-items:center; }
+        .app-icon { position:absolute; transition:0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform:scale(0); opacity:0; width:75px; height:75px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:20px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:12px; }
     </style>
 </head>
 <body>
 
     <div id="userHeader">
         <div class="user-mini-photo" id="miniPhoto">👤</div>
-        <span id="userNameTop" style="font-size: 14px; font-weight: bold;">Visitante</span>
+        <span id="userNameTop">Visitante</span>
     </div>
 
     <video id="v" loop playsinline autoplay></video>
 
-    <section id="chat"><h2>Mensagens Real</h2><button onclick="showPage('')">Voltar</button></section>
-    <section id="videos"><h2>Feed de Vídeos</h2><button onclick="showPage('')">Voltar</button></section>
+    <section id="chat">
+        <div id="chat-container"></div>
+        <div class="chat-input-area">
+            <input type="text" id="msgInput" placeholder="Sua vibe...">
+            <button class="btn-send" onclick="enviarMensagem()">🚀</button>
+        </div>
+        <button onclick="showPage('')" style="position:absolute; top:30px; right:20px; background:none; border:none; color:#fff; font-size:20px;">✕</button>
+    </section>
 
-    <div id="perfilPanel">
-        <label class="profile-photo-big" id="photoDisplay">👤<input type="file" accept="image/*" style="display:none" onchange="processarFoto(this)"></label>
-        <input type="text" class="input-profile" id="p_nome" placeholder="Digite seu Nome">
-        <input type="password" class="input-profile" id="p_senha" placeholder="Crie uma Senha">
-        <button class="btn-save" onclick="salvarTudo()">SALVAR NO DISPOSITIVO</button>
-        <button onclick="togglePerfil()" style="background:none; border:none; color:#777; margin-top:10px;">Fechar</button>
-    </div>
+    <section id="videos">
+        <h2 style="color:var(--accent)">FEED OIO</h2>
+        <button onclick="showPage('')" style="margin-top:20px; color:#fff;">Voltar</button>
+    </section>
 
     <div class="hud">
         <div class="side">
-            <button class="btn-nav" onclick="togglePerfil()">⚙️</button>
-            <button class="btn-main" id="btnPlus" onclick="toggleMenuPlus()">+</button>
             <button class="btn-nav" onclick="proximo()">❯</button>
+            <button class="btn-main" onclick="toggleMenuPlus()">+</button>
+            <button class="btn-nav" onclick="showPage('chat')">💬</button>
         </div>
     </div>
 
     <div id="menu-explosivo">
-        <div id="apps-container">
+        <div style="position:relative; width:300px; height:300px; display:flex; justify-content:center; align-items:center;">
             <div class="app-icon" onclick="showPage('chat')">💬<br>Vibe</div>
             <div class="app-icon" onclick="window.location.href='https://google.com'">🔍<br>Google</div>
             <div class="app-icon" onclick="window.location.href='https://youtube.com'">📺<br>YouTube</div>
@@ -114,102 +91,88 @@
         </div>
     </div>
 
-    <div id="gaveta-contatos" class="gaveta-glass">
-        <div class="handle"></div>
-        <div style="color: white; padding: 10px;">Contatos OIO ONE</div>
-    </div>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <script>
-        const video = document.getElementById('v');
-        let playlist = JSON.parse(localStorage.getItem('oio_playlist')) || [];
-        let index = 0;
-
-        window.onload = () => {
-            const perfil = JSON.parse(localStorage.getItem('oio_id'));
-            if(perfil) {
-                document.getElementById('p_nome').value = perfil.nome;
-                document.getElementById('userNameTop').innerText = perfil.nome;
-                if(perfil.foto) atualizarVisualFoto(perfil.foto);
-            }
+        // CONFIGURAÇÃO FIREBASE (Substitua pelos seus dados do console)
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY",
+            databaseURL: "https://vibe-app-bbba2-default-rtdb.firebaseio.com/",
+            projectId: "vibe-app-bbba2",
+            storageBucket: "vibe-app-bbba2.appspot.com",
+            messagingSenderId: "SEU_ID",
+            appId: "SEU_APP_ID"
         };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        // CONTROLE DE VÍDEO
-        window.tocar = (idx) => { if (playlist[idx]) { video.src = playlist[idx]; video.play(); index = idx; } };
-        window.proximo = () => { if(playlist.length > 0) { index = (index + 1) % playlist.length; tocar(index); } };
+        // IDENTIDADE
+        let meuNome = JSON.parse(localStorage.getItem('oio_id'))?.nome || "Visitante";
+        document.getElementById('userNameTop').innerText = meuNome;
 
         // SALTO QUÂNTICO
-        window.showPage = (pageId) => {
+        window.showPage = (id) => {
             document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-            const target = document.getElementById(pageId);
+            const target = document.getElementById(id);
             if(target) {
                 target.classList.add('active');
-                if (navigator.vibrate) navigator.vibrate(20);
-                document.getElementById('menu-explosivo').style.display = 'none';
+                if(id === 'chat') carregarMensagens();
             }
         };
 
-        // MENU EXPLOSIVO
-        window.toggleMenuPlus = () => {
-            const menu = document.getElementById('menu-explosivo');
-            const icons = document.querySelectorAll('.app-icon');
-            if (menu.style.display === 'none' || menu.style.display === '') {
-                menu.style.display = 'flex';
-                const pos = [[0,-115], [115,0], [0,115], [-115,0]];
-                setTimeout(() => {
-                    icons.forEach((icon, i) => {
-                        icon.style.transform = `translate(${pos[i][0]}px, ${pos[i][1]}px) scale(1.1)`;
-                        icon.style.opacity = "1";
-                    });
-                }, 50);
-            } else {
-                icons.forEach(icon => { icon.style.transform = 'scale(0)'; icon.style.opacity = '0'; });
-                setTimeout(() => menu.style.display = 'none', 400);
-            }
-        };
-
-        // GESTOS (TOUCH GAVETA E VÍDEO)
+        // GESTOS
         let sy = 0;
         document.addEventListener('touchstart', e => sy = e.touches[0].clientY);
         document.addEventListener('touchend', e => {
             let dy = sy - e.changedTouches[0].clientY;
-            const gaveta = document.getElementById('gaveta-contatos');
-            
-            if (dy > 100) { // Deslize para CIMA
-                gaveta.classList.add('open');
-                if (navigator.vibrate) navigator.vibrate(15);
-            } else if (dy < -100) { // Deslize para BAIXO
-                gaveta.classList.remove('open');
-            } else if (Math.abs(dy) < 10 && !e.target.closest('button, label, .app-icon')) {
-                video.paused ? video.play() : video.pause();
-            }
+            if (dy > 80) showPage('chat');
+            else if (dy < -80) showPage('videos');
         });
 
-        // IDENTIDADE
-        window.togglePerfil = () => {
-            const p = document.getElementById('perfilPanel');
-            p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
-        };
-
-        window.processarFoto = (input) => {
-            const reader = new FileReader();
-            reader.onload = (e) => { window.fotoBase64 = e.target.result; atualizarVisualFoto(window.fotoBase64); };
-            reader.readAsDataURL(input.files[0]);
-        };
-
-        function atualizarVisualFoto(url) {
-            document.getElementById('photoDisplay').style.backgroundImage = `url(${url})`;
-            document.getElementById('photoDisplay').innerText = "";
-            document.getElementById('miniPhoto').style.backgroundImage = `url(${url})`;
-            document.getElementById('miniPhoto').innerText = "";
+        // LÓGICA DO CHAT
+        function enviarMensagem() {
+            const txt = document.getElementById('msgInput').value;
+            if(!txt) return;
+            db.ref('mensagens').push({
+                nome: meuNome,
+                texto: txt,
+                timestamp: Date.now()
+            });
+            document.getElementById('msgInput').value = "";
         }
 
-        window.salvarTudo = () => {
-            const nome = document.getElementById('p_nome').value || "Michel";
-            const id = { nome: nome, foto: window.fotoBase64 || "" };
-            localStorage.setItem('oio_id', JSON.stringify(id));
-            document.getElementById('userNameTop').innerText = nome;
-            alert("OIO ONE: Identidade Atualizada!");
-            togglePerfil();
+        function carregarMensagens() {
+            db.ref('mensagens').limitToLast(20).on('value', snapshot => {
+                const container = document.getElementById('chat-container');
+                container.innerHTML = "";
+                snapshot.forEach(child => {
+                    const m = child.val();
+                    const div = document.createElement('div');
+                    div.className = `msg ${m.nome === meuNome ? 'sent' : 'received'}`;
+                    div.innerHTML = `<span class="msg-info">${m.nome}</span>${m.texto}`;
+                    container.appendChild(div);
+                });
+                container.scrollTop = container.scrollHeight;
+            });
+        }
+
+        // MENU EXPLOSIVO
+        window.toggleMenuPlus = () => {
+            const m = document.getElementById('menu-explosivo');
+            const icons = document.querySelectorAll('.app-icon');
+            if(m.style.display === 'none' || m.style.display === ''){
+                m.style.display = 'flex';
+                const pos = [[0,-115], [115,0], [0,115], [-115,0]];
+                setTimeout(() => icons.forEach((icon, i) => {
+                    icon.style.transform = `translate(${pos[i][0]}px, ${pos[i][1]}px) scale(1)`;
+                    icon.style.opacity = "1";
+                }), 50);
+            } else {
+                icons.forEach(i => i.style.transform = 'scale(0)');
+                setTimeout(() => m.style.display = 'none', 400);
+            }
         };
     </script>
 </body>
