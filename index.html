@@ -7,74 +7,75 @@
     <style>
         /* CSS INTEGRADO - DNA OIO ONE */
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-        body { font-family: 'Segoe UI', sans-serif; background:#000; color:#fff; overflow:hidden; height:100vh; }
+        body { font-family: Arial, sans-serif; background:#000; color:#fff; overflow:hidden; height:100vh; }
 
-        /* Camada de Identidade (Base) */
+        /* Camada de Identidade */
         #topo {
             position:fixed; top:0; width:100%; height:70px;
             display:flex; align-items:center; padding:15px; z-index:100;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
         }
-        #fotoPerfil { width:45px; height:45px; border-radius:50%; border:2px solid #0af; background:#333; background-size:cover; }
-        #nomePerfil { margin-left:12px; font-weight:bold; font-size:1.1em; text-shadow: 1px 1px 2px #000; }
+        #fotoPerfil { width:45px; height:45px; border-radius:50%; border:2px solid #0af; background-size:cover; background-position:center; }
+        #nomePerfil { margin-left:12px; font-weight:bold; text-shadow: 1px 1px 2px #000; }
 
-        /* Feed de Vídeo (70% da Experiência) */
-        #feed { position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
+        /* Feed estilo TikTok */
+        #feed { position:absolute; top:0; left:0; width:100%; height:100%; background:#000; }
         video { width:100%; height:100%; object-fit:cover; }
 
-        /* Camada de Interação (Gesto e Chat) */
+        /* Camada de Interação (Chat) */
         #chat {
-            position:fixed; bottom:-50%; left:0; width:100%; height:50%; 
-            background:rgba(15, 15, 15, 0.95); backdrop-filter: blur(10px);
-            transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border-top: 1px solid #333; border-radius: 20px 20px 0 0; z-index:150;
+            position:fixed; bottom:-60%; left:0; width:100%; height:60%; 
+            background:rgba(20, 20, 20, 0.95); backdrop-filter: blur(15px);
+            transition: 0.4s ease; border-radius: 20px 20px 0 0; z-index:150;
             display:flex; flex-direction:column;
         }
         #chat.ativo { bottom:0; }
-        
         #mensagens { flex:1; overflow-y:auto; padding:20px; }
-        .msg { margin-bottom:12px; padding:8px 12px; background:rgba(255,255,255,0.1); border-radius:10px; width:fit-content; }
+        .msg { margin-bottom:10px; padding:10px; background:rgba(255,255,255,0.1); border-radius:10px; }
         .msg b { color:#0af; display:block; font-size:0.8em; }
 
-        #campo-msg { display:flex; padding:15px; background:#222; }
-        input { flex:1; padding:12px; border:none; border-radius:25px; background:#333; color:#fff; outline:none; }
-        
-        /* Botões Flutuantes */
-        #acoes { position:fixed; right:15px; bottom:100px; display:flex; flex-direction:column; gap:20px; z-index:110; }
-        .btn { width:55px; height:55px; background:rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; backdrop-filter:blur(5px); border:1px solid rgba(255,255,255,0.2); }
+        #campo-enviar { display:flex; padding:15px; background:#111; }
+        input { flex:1; padding:12px; border:none; border-radius:25px; background:#222; color:#fff; outline:none; }
+
+        /* Botões de Ação */
+        #acoes { position:fixed; right:15px; bottom:120px; display:flex; flex-direction:column; gap:20px; z-index:110; }
+        .btn-circular { width:55px; height:55px; background:rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; backdrop-filter:blur(5px); border:1px solid rgba(255,255,255,0.2); }
     </style>
 </head>
 <body>
 
 <div id="topo">
-    <div id="fotoPerfil"></div>
-    <div id="nomePerfil">Carregando...</div>
+    <div id="fotoPerfil" style="background-image: url('https://via.placeholder.com/150');"></div>
+    <div id="nomePerfil">Usuário OIO</div>
 </div>
 
-<div id="feed">
-    <video id="player" playsinline loop poster="https://via.placeholder.com/400x800?text=OIO+ONE+Carregando"></video>
+<div id="feed" onclick="pausarVideo()">
+    <video id="player" playsinline loop src=""></video>
 </div>
 
 <div id="acoes">
-    <div class="btn" onclick="toggleChat()">💬</div>
-    <div class="btn" id="btnUpload">🎬</div>
+    <div class="btn-circular" onclick="toggleChat()">💬</div>
+    <div class="btn-circular" onclick="document.getElementById('upload').click()">🎬</div>
 </div>
 
+<input type="file" id="upload" accept="video/*" style="display:none" onchange="uploadVideo(this)">
+
 <div id="chat">
-    <div style="width:40px; height:4px; background:#555; margin:10px auto; border-radius:2px;"></div>
     <div id="mensagens"></div>
-    <div id="campo-msg">
-        <input id="inputMsg" placeholder="Diga algo...">
-        <button onclick="enviar()" style="background:none; border:none; color:#0af; margin-left:10px; font-weight:bold;">ENVIAR</button>
+    <div id="campo-enviar">
+        <input id="inputMsg" placeholder="Escrever mensagem...">
+        <button onclick="enviarMsg()" style="background:none; border:none; color:#0af; margin-left:10px; font-weight:bold;">OK</button>
     </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 <script>
+// Configuração que estava no seu Firebase (vibe-app-bbba2)
 const firebaseConfig = {
-    apiKey: "SUA_CHAVE_AQUI", // <--- COLE SUA CHAVE AQUI
+    apiKey: "SUA_API_KEY_AQUI", 
     authDomain: "vibe-app-bbba2.firebaseapp.com",
     databaseURL: "https://vibe-app-bbba2-default-rtdb.firebaseio.com",
     projectId: "vibe-app-bbba2",
@@ -83,34 +84,41 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// Lógica de Usuário
-let user = JSON.parse(localStorage.getItem("oio_user")) || { nome: prompt("Qual seu nome?"), foto: "" };
-localStorage.setItem("oio_user", JSON.stringify(user));
-document.getElementById("nomePerfil").innerText = user.nome;
+// Lógica de Gestos e Player
+let player = document.getElementById('player');
+function pausarVideo() {
+    if (player.paused) player.play();
+    else player.pause();
+}
 
-// Gestos Touch (Touchscreen Real)
+// Touch Screen: Deslizar para cima (Próximo)
 let startY = 0;
 document.addEventListener('touchstart', e => { startY = e.touches[0].clientY; });
 document.addEventListener('touchend', e => {
     let diffY = startY - e.changedTouches[0].clientY;
-    if (diffY > 100) proximoVideo(); // Deslizar para cima
-    if (diffY < -100) toggleChat();   // Deslizar para baixo abre/fecha chat
+    if (diffY > 80) carregarProximoVideo(); 
 });
 
 function toggleChat() {
     document.getElementById("chat").classList.toggle("ativo");
 }
 
-// Sistema de Chat Real-time
-function enviar() {
-    const txt = document.getElementById("inputMsg").value;
-    if(txt) {
-        db.ref("mensagens").push({ nome: user.nome, texto: txt, timestamp: Date.now() });
+function carregarProximoVideo() {
+    // Puxa o próximo vídeo do banco vibe-app-bbba2
+    db.ref("videos").limitToLast(1).once("value", snap => {
+        snap.forEach(v => { player.src = v.val().url; player.play(); });
+    });
+}
+
+function enviarMsg() {
+    const texto = document.getElementById("inputMsg").value;
+    if(texto) {
+        db.ref("mensagens").push({ nome: "Michel", texto: texto });
         document.getElementById("inputMsg").value = "";
     }
 }
 
-db.ref("mensagens").limitToLast(20).on("child_added", snap => {
+db.ref("mensagens").on("child_added", snap => {
     const m = snap.val();
     const div = document.createElement("div");
     div.className = "msg";
@@ -118,12 +126,6 @@ db.ref("mensagens").limitToLast(20).on("child_added", snap => {
     document.getElementById("mensagens").appendChild(div);
     document.getElementById("mensagens").scrollTop = document.getElementById("mensagens").scrollHeight;
 });
-
-// Simulação de Feed (Aqui entrará sua lista do Firebase)
-function proximoVideo() {
-    console.log("Salto Quântico: Carregando próximo...");
-    // Aqui adicionamos a lógica de trocar o src do player
-}
 </script>
 </body>
 </html>
