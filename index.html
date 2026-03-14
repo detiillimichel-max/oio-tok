@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OIO ONE - BLINDADO</title>
+    <title>OIO ONE - VERSÃO FINAL</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
@@ -19,26 +19,31 @@
         .contato-item.active { opacity: 1; transform: scale(1.1); }
         .contato-photo { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #fff; background-size: cover; background-position: center; background-color: #222; }
 
+        /* COMANDOS FEED */
+        .btn-add-media { position: absolute; top: 20px; right: 20px; z-index: 600; font-size: 28px; color: var(--accent); }
+        .toggle-vibe { position: absolute; top: 70px; right: 20px; z-index: 600; font-size: 24px; color: #fff; opacity: 0.8; }
+
         /* SEÇÕES */
-        section { display:none; position:fixed; inset:0; z-index:1000; flex-direction:column; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); }
+        section { display:none; position:fixed; inset:0; z-index:1000; flex-direction:column; background: #000; }
         section.active { display:flex; }
         
-        /* FEED DE VÍDEOS */
-        #feed-videos { overflow-y: auto; padding: 100px 15px 150px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .video-card { width: 100%; aspect-ratio: 9/16; background: #111; border-radius: 20px; overflow: hidden; border: 1px solid var(--glass); }
+        /* MODOS DE FEED (ESCOLHA) */
+        #feed-videos { overflow-y: auto; padding: 110px 15px 150px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        #feed-videos.tiktok-mode { display: block; padding: 0; scroll-snap-type: y mandatory; }
+        .video-card { width: 100%; aspect-ratio: 9/16; background: #111; border-radius: 20px; overflow: hidden; border: 1px solid var(--glass); position: relative; }
+        #feed-videos.tiktok-mode .video-card { height: 100vh; width: 100vw; border-radius: 0; border: none; scroll-snap-align: start; }
         .video-card video { width: 100%; height: 100%; object-fit: cover; }
 
         /* CHAT */
+        #chat-page { background: rgba(0,0,0,0.85); backdrop-filter: blur(25px); }
         #chat-container { flex:1; overflow-y:auto; padding: 120px 20px 20px; display:flex; flex-direction:column; gap:12px; }
-        .msg { padding:12px 16px; border-radius:20px; max-width:85%; background:rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.05); }
-        .msg.sent { align-self: flex-end; background: #0066ff; border:none; }
-        .msg img, .msg video { width: 100%; border-radius: 12px; margin-top: 5px; }
+        .msg { padding:14px; border-radius:20px; max-width:85%; background:rgba(255,255,255,0.08); }
+        .msg.sent { align-self: flex-end; background: #0066ff; }
 
-        /* CONTROLES */
         .controles { display:flex; gap:15px; padding:15px 20px; background:#000; align-items:center; border-top: 1px solid #222; padding-bottom: env(safe-area-inset-bottom); }
         .controles input { flex:1; padding:12px 18px; border-radius:25px; border:none; background:#1a1a1a; color:#fff; outline:none; }
-        .btn-vibe { color:var(--accent); font-size: 24px; cursor:pointer; }
-        .btn-main { position:absolute; right:25px; bottom:120px; width:65px; height:65px; border-radius:50%; background:var(--accent); color:#000; font-size:30px; border:none; z-index:1500; display:flex; align-items:center; justify-content:center; box-shadow: 0 0 20px rgba(0,229,255,0.3); }
+        .btn-vibe { color:var(--accent); font-size: 24px; }
+        .btn-main { position:absolute; right:25px; bottom:120px; width:65px; height:65px; border-radius:50%; background:var(--accent); color:#000; font-size:30px; border:none; z-index:1500; display:flex; align-items:center; justify-content:center; }
     </style>
 </head>
 <body>
@@ -54,12 +59,13 @@
         </div>
     </div>
 
-    <i class="fa-solid fa-circle-plus" style="position:absolute; top:20px; right:20px; z-index:600; font-size:28px; color:var(--accent); cursor:pointer;" onclick="showPage('videos-page')"></i>
+    <i class="fa-solid fa-circle-plus btn-add-media" onclick="showPage('videos-page')"></i>
     <video id="bg-video" loop playsinline autoplay muted></video>
 
     <section id="videos-page">
+        <i class="fa-solid fa-table-cells toggle-vibe" onclick="document.getElementById('feed-videos').classList.toggle('tiktok-mode')"></i>
         <div id="feed-videos"></div>
-        <button style="position:fixed; bottom:30px; left:50%; transform:translateX(-50%); padding:15px 30px; border-radius:30px; background:var(--accent); border:none; font-weight:bold; z-index:1100;" onclick="document.getElementById('videoInput').click()">NOVO VÍDEO (LEVE)</button>
+        <button style="position:fixed; bottom:30px; left:50%; transform:translateX(-50%); padding:15px 30px; border-radius:30px; background:var(--accent); border:none; font-weight:bold; z-index:1100;" onclick="document.getElementById('videoInput').click()">NOVO VÍDEO</button>
         <button onclick="showPage('')" style="position:fixed; bottom:5px; left:50%; transform:translateX(-50%); color:#fff; background:none; border:none; font-size:12px; z-index:1100;">VOLTAR</button>
     </section>
 
@@ -115,20 +121,15 @@
             });
         });
 
-        // CARREGAR CHAT
-        db.child("messages").limitToLast(15).on('value', snap => {
+        // CHAT
+        db.child("messages").limitToLast(10).on('value', snap => {
             const container = document.getElementById('chat-container');
             container.innerHTML = "";
             snap.forEach(c => {
                 const m = c.val();
                 const d = document.createElement('div');
                 d.className = "msg " + (m.autor === window.meuNome ? "sent" : "");
-                let h = `<small style="color:var(--accent); font-size:9px;">${m.autor}</small>`;
-                if(m.texto) h += `<div>${m.texto}</div>`;
-                if(m.url) h += `<img src="${m.url}">`;
-                if(m.videoUrl) h += `<video controls src="${m.videoUrl}"></video>`;
-                if(m.audio) h += `<div>🎤 Áudio</div>`;
-                d.innerHTML = h;
+                d.innerHTML = `<small style="color:var(--accent); font-size:9px;">${m.autor}</small><div>${m.texto || (m.audio?'🎤 Áudio':'🖼️ Mídia')}</div>`;
                 container.appendChild(d);
             });
             container.scrollTop = container.scrollHeight;
@@ -139,45 +140,40 @@
             if(i.value.trim()){ db.child("messages").push({ autor: window.meuNome, texto: i.value }); i.value = ""; }
         }
 
-        // --- COMPRESSOR DE MÍDIA (O SEGREDO PARA NÃO TRAVAR) ---
-        document.getElementById('mediaInput').onchange = (e) => {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                const tipo = file.type.includes('video') ? 'videoUrl' : 'url';
-                // Aqui enviamos com compressão visual (o navegador ajuda a reduzir)
-                db.child("messages").push({ autor: window.meuNome, [tipo]: ev.target.result });
-            };
-            reader.readAsDataURL(file);
-        };
-
-        document.getElementById('videoInput').onchange = (e) => {
-            const reader = new FileReader();
-            reader.onload = (ev) => db.child("videos_feed").push({ url: ev.target.result });
-            reader.readAsDataURL(e.target.files[0]);
-        };
-
-        // MICROFONE
+        // --- GRAVAÇÃO DE ÁUDIO REFORÇADA ---
         let mediaRecorder; let audioChunks = [];
         async function toggleGravacao() {
-            if (!mediaRecorder || mediaRecorder.state === "inactive") {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp4' });
-                    const reader = new FileReader();
-                    reader.readAsDataURL(audioBlob);
-                    reader.onloadend = () => db.child("messages").push({ autor: window.meuNome, audio: reader.result });
-                };
-                mediaRecorder.start();
-                document.getElementById('micBtn').style.color = "red";
-            } else {
-                mediaRecorder.stop();
-                document.getElementById('micBtn').style.color = "var(--accent)";
-            }
+            try {
+                const micBtn = document.getElementById('micBtn');
+                if (!mediaRecorder || mediaRecorder.state === "inactive") {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    // Mudança para formato mais aceito (WebM/Audio)
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const reader = new FileReader();
+                        reader.readAsDataURL(audioBlob);
+                        reader.onloadend = () => {
+                            db.child("messages").push({ autor: window.meuNome, audio: reader.result });
+                        };
+                    };
+                    mediaRecorder.start();
+                    micBtn.style.color = "red";
+                } else {
+                    mediaRecorder.stop();
+                    micBtn.style.color = "var(--accent)";
+                }
+            } catch(e) { alert("Erro no Microfone: Verifique as permissões do navegador."); }
         }
+
+        document.getElementById('videoInput').onchange = (e) => {
+            const r = new FileReader();
+            r.onload = (ev) => db.child("videos_feed").push({ url: ev.target.result });
+            r.readAsDataURL(e.target.files[0]);
+        };
     </script>
 </body>
 </html>
+,
