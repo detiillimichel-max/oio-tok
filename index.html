@@ -8,42 +8,37 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        :root { --accent: #00e5ff; --glass: rgba(255, 255, 255, 0.1); }
+        :root { --accent: #00e5ff; }
         * { margin:0; padding:0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body, html { background:#000; height:100vh; width:100vw; overflow:hidden; position:fixed; font-family: sans-serif; color: #fff; }
-        
         video#bg-video { position:absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: 1; filter: brightness(0.6); }
 
-        /* HEADER IDENTIDADE */
+        /* HEADER */
         #userHeader { position: absolute; top: 20px; left: 20px; z-index: 500; display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 30px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
-        .user-mini-photo { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--accent); background-size: cover; background-position: center; }
+        .user-mini-photo { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--accent); background-image: url('https://via.placeholder.com/150'); background-size: cover; }
         .btn-top-plus { position: absolute; top: 20px; right: 20px; z-index: 500; font-size: 28px; color: var(--accent); cursor: pointer; }
 
-        /* SEÇÕES */
-        section { display:none; position:fixed; inset:0; z-index:1000; flex-direction:column; transition: 0.4s; transform: scale(0.9); opacity:0; }
-        section.active { display:flex; transform:scale(1); opacity:1; }
-        #chat-page { background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); }
-
+        /* CHAT */
+        section { display:none; position:fixed; inset:0; z-index:1000; flex-direction:column; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); }
+        section.active { display:flex; }
         #chat-container { flex:1; overflow-y:auto; padding: 100px 20px 20px; display:flex; flex-direction:column; gap:12px; }
         .msg { padding:12px; border-radius:18px; max-width:85%; background:rgba(255,255,255,0.1); border: 1px solid rgba(0,229,255,0.15); }
-        .msg.sent { align-self: flex-end; background: #0066ff; color:#fff; border:none; }
-        .msg img { max-width: 100%; border-radius: 12px; margin-top: 5px; display: block; }
-        .msg small { font-size: 10px; opacity: 0.6; display: block; margin-bottom: 3px; }
+        .msg.sent { align-self: flex-end; background: #0066ff; border:none; }
+        .msg img { max-width: 100%; border-radius: 12px; margin-top: 5px; }
 
-        /* CONTROLES ORGANIZADOS */
-        .controles { display:flex; gap:18px; padding:15px 20px; background:rgba(10,10,10,0.98); align-items:center; border-top: 1px solid #222; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
+        /* CONTROLES COM ÍCONES */
+        .controles { display:flex; gap:20px; padding:15px 20px; background:rgba(10,10,10,0.98); align-items:center; border-top: 1px solid #222; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
         .controles input { flex:1; padding:12px 18px; border-radius:25px; border:none; background:#1a1a1a; color:#fff; outline:none; font-size: 16px; }
-        .btn-vibe { color:var(--accent); font-size: 24px; cursor:pointer; }
+        .btn-vibe { color:var(--accent); font-size: 26px; cursor:pointer; }
         
-        /* BOTÃO ESTRELA */
-        .btn-main { position:absolute; right:20px; bottom:110px; width:65px; height:65px; border-radius:50%; background:var(--accent); color:#000; font-size:30px; border:none; z-index:1500; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(0,229,255,0.4); }
+        .btn-main { position:absolute; right:20px; bottom:110px; width:65px; height:65px; border-radius:50%; background:var(--accent); color:#000; font-size:30px; border:none; z-index:1500; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
     <div id="userHeader">
-        <div class="user-mini-photo" id="miniPhoto"></div>
-        <span id="userNameTop">Michel</span>
+        <div class="user-mini-photo"></div>
+        <span>Michel</span>
     </div>
 
     <i class="fa-solid fa-circle-plus btn-top-plus" onclick="document.getElementById('videoInput').click()"></i>
@@ -55,12 +50,10 @@
         <div class="controles">
             <i class="fa-solid fa-camera btn-vibe" onclick="abrirCamera()"></i>
             <i class="fa-solid fa-phone btn-vibe" onclick="fazerLigacao()"></i>
-            
             <input id="msgInput" placeholder="Sua vibe...">
-            
             <i class="fa-solid fa-paper-plane btn-vibe" onclick="enviar()"></i>
         </div>
-        <button onclick="showPage('')" style="position:absolute; top:30px; right:25px; color:#fff; background:rgba(0,0,0,0.5); border:none; width:35px; height:35px; border-radius:50%;">✕</button>
+        <button onclick="showPage('')" style="position:absolute; top:30px; right:25px; color:#fff; background:none; border:none; font-size:24px;">✕</button>
     </section>
 
     <button class="btn-main" onclick="showPage('chat-page')"><i class="fa-solid fa-comment"></i></button>
@@ -75,38 +68,19 @@
             projectId: "vibe-app-bbba2"
         };
         firebase.initializeApp(config);
-        const db = firebase.database().ref("/");
 
-        // TOQUE PARA PAUSAR
         const video = document.getElementById('bg-video');
-        video.onclick = () => {
-            if(video.paused) video.play(); else video.pause();
-            if(navigator.vibrate) navigator.vibrate(30);
-        };
+        video.onclick = () => { if(video.paused) video.play(); else video.pause(); };
 
-        function fazerLigacao() {
-            window.location.href = "tel:";
-            if(navigator.vibrate) navigator.vibrate(50);
-        }
+        function fazerLigacao() { window.location.href = "tel:"; }
+        function abrirCamera() { document.getElementById('fotoInput').click(); }
 
-        function abrirCamera() {
-            document.getElementById('fotoInput').click();
-        }
-
-        // SUBIR VÍDEO (BOTÃO +)
         document.getElementById('videoInput').onchange = function(e) {
             const reader = new FileReader();
-            reader.onload = (ev) => {
-                firebase.database().ref("videos").push({
-                    url: ev.target.result,
-                    autor: window.meuNome || "Michel",
-                    time: Date.now()
-                });
-            };
+            reader.onload = (ev) => { firebase.database().ref("videos").push({ url: ev.target.result }); };
             reader.readAsDataURL(e.target.files[0]);
         };
 
-        // ATUALIZA FUNDO PARA TODOS
         firebase.database().ref("videos").limitToLast(1).on('child_added', snap => {
             if(snap.val().url) video.src = snap.val().url;
         });
@@ -114,41 +88,27 @@
         function enviar(){
             const input = document.getElementById('msgInput');
             if(input.value.trim()){
-                firebase.database().ref("messages").push({ 
-                    autor: window.meuNome || "Michel", 
-                    texto: input.value, 
-                    time: Date.now() 
-                });
+                firebase.database().ref("messages").push({ autor: "Michel", texto: input.value });
                 input.value = "";
-                if(navigator.vibrate) navigator.vibrate(20);
             }
         }
 
-        // ENVIO DE FOTO DA CÂMERA
         document.getElementById('fotoInput').onchange = function(e) {
             const reader = new FileReader();
-            reader.onload = (ev) => {
-                firebase.database().ref("messages").push({
-                    autor: window.meuNome || "Michel",
-                    url: ev.target.result,
-                    time: Date.now()
-                });
-            };
+            reader.onload = (ev) => { firebase.database().ref("messages").push({ autor: "Michel", url: ev.target.result }); };
             reader.readAsDataURL(e.target.files[0]);
         };
 
         function showPage(id) {
             document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-            const target = document.getElementById(id);
-            if(target) target.classList.add('active');
+            if(id) document.getElementById(id).classList.add('active');
         }
 
-        // MOSTRAR MENSAGENS
         firebase.database().ref("messages").limitToLast(20).on('child_added', snap => {
             const m = snap.val();
             const container = document.getElementById('chat-container');
             const d = document.createElement('div');
-            d.className = "msg " + (m.autor === window.meuNome ? "sent" : "");
+            d.className = "msg " + (m.autor === "Michel" ? "sent" : "");
             d.innerHTML = `<small>${m.autor}</small>${m.url ? `<img src="${m.url}">` : m.texto}`;
             container.appendChild(d);
             container.scrollTop = container.scrollHeight;
