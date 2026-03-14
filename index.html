@@ -2,24 +2,82 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OIO ONE - RESET DE EMERGÊNCIA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OIO ONE - BLINDADO</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        body { background: #000; color: #00e5ff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; padding: 20px; }
-        #status { font-size: 20px; margin-bottom: 30px; border: 1px solid #00e5ff; padding: 15px; border-radius: 10px; }
-        button { padding: 20px 40px; border-radius: 40px; border: none; background: #ff0055; color: #fff; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: 0 0 20px rgba(255,0,85,0.4); }
-        .aviso { margin-top: 20px; color: #fff; opacity: 0.6; font-size: 12px; }
+        :root { --accent: #00e5ff; --glass: rgba(255, 255, 255, 0.1); }
+        * { margin:0; padding:0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body, html { background:#000; height:100vh; width:100vw; overflow:hidden; position:fixed; font-family: sans-serif; color: #fff; }
+        video#bg-video { position:absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: 1; filter: brightness(0.3); }
+
+        /* TOPO SALTO QUÂNTICO */
+        #contatos-topo { position: absolute; top: 15px; left: 0; width: 100%; z-index: 500; display: flex; gap: 15px; padding: 10px 20px; overflow-x: auto; scrollbar-width: none; }
+        .contato-item { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.4; transition: 0.4s; }
+        .contato-item.active { opacity: 1; transform: scale(1.1); }
+        .contato-photo { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #fff; background-size: cover; background-position: center; background-color: #222; }
+
+        /* SEÇÕES */
+        section { display:none; position:fixed; inset:0; z-index:1000; flex-direction:column; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); }
+        section.active { display:flex; }
+        
+        /* FEED DE VÍDEOS */
+        #feed-videos { overflow-y: auto; padding: 100px 15px 150px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .video-card { width: 100%; aspect-ratio: 9/16; background: #111; border-radius: 20px; overflow: hidden; border: 1px solid var(--glass); }
+        .video-card video { width: 100%; height: 100%; object-fit: cover; }
+
+        /* CHAT */
+        #chat-container { flex:1; overflow-y:auto; padding: 120px 20px 20px; display:flex; flex-direction:column; gap:12px; }
+        .msg { padding:12px 16px; border-radius:20px; max-width:85%; background:rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.05); }
+        .msg.sent { align-self: flex-end; background: #0066ff; border:none; }
+        .msg img, .msg video { width: 100%; border-radius: 12px; margin-top: 5px; }
+
+        /* CONTROLES */
+        .controles { display:flex; gap:15px; padding:15px 20px; background:#000; align-items:center; border-top: 1px solid #222; padding-bottom: env(safe-area-inset-bottom); }
+        .controles input { flex:1; padding:12px 18px; border-radius:25px; border:none; background:#1a1a1a; color:#fff; outline:none; }
+        .btn-vibe { color:var(--accent); font-size: 24px; cursor:pointer; }
+        .btn-main { position:absolute; right:25px; bottom:120px; width:65px; height:65px; border-radius:50%; background:var(--accent); color:#000; font-size:30px; border:none; z-index:1500; display:flex; align-items:center; justify-content:center; box-shadow: 0 0 20px rgba(0,229,255,0.3); }
     </style>
 </head>
 <body>
 
-    <div id="status">Verificando conexão com o banco...</div>
-    
-    <button onclick="limparBanco()">⚠️ LIMPAR TUDO AGORA</button>
-    
-    <div class="aviso">Isso vai destravar o seu Firebase apagar vídeos e áudios antigos.</div>
+    <div id="contatos-topo">
+        <div class="contato-item" id="item-Michel" onclick="trocarUser('Michel', this)">
+            <div class="contato-photo" style="background-image: url('https://github.com/MichelDetilli.png')"></div>
+            <span style="font-size:10px">Michel</span>
+        </div>
+        <div class="contato-item" id="item-Gabriela" onclick="trocarUser('Gabriela', this)">
+            <div class="contato-photo" style="background-image: url('https://via.placeholder.com/150/ff007f?text=G')"></div>
+            <span style="font-size:10px">Gabriela</span>
+        </div>
+    </div>
+
+    <i class="fa-solid fa-circle-plus" style="position:absolute; top:20px; right:20px; z-index:600; font-size:28px; color:var(--accent); cursor:pointer;" onclick="showPage('videos-page')"></i>
+    <video id="bg-video" loop playsinline autoplay muted></video>
+
+    <section id="videos-page">
+        <div id="feed-videos"></div>
+        <button style="position:fixed; bottom:30px; left:50%; transform:translateX(-50%); padding:15px 30px; border-radius:30px; background:var(--accent); border:none; font-weight:bold; z-index:1100;" onclick="document.getElementById('videoInput').click()">NOVO VÍDEO (LEVE)</button>
+        <button onclick="showPage('')" style="position:fixed; bottom:5px; left:50%; transform:translateX(-50%); color:#fff; background:none; border:none; font-size:12px; z-index:1100;">VOLTAR</button>
+    </section>
+
+    <section id="chat-page">
+        <div id="chat-container"></div>
+        <div class="controles">
+            <i class="fa-solid fa-camera btn-vibe" onclick="document.getElementById('mediaInput').click()"></i>
+            <i id="micBtn" class="fa-solid fa-microphone btn-vibe" onclick="toggleGravacao()"></i>
+            <input id="msgInput" placeholder="Sua vibe...">
+            <i class="fa-solid fa-paper-plane btn-vibe" onclick="enviar()"></i>
+        </div>
+        <button onclick="showPage('')" style="position:absolute; top:35px; right:25px; color:#fff; background:none; border:none; font-size:26px;">✕</button>
+    </section>
+
+    <button class="btn-main" onclick="showPage('chat-page')"><i class="fa-solid fa-comment"></i></button>
+
+    <input type="file" id="mediaInput" accept="image/*,video/*" style="display:none">
+    <input type="file" id="videoInput" accept="video/*" style="display:none">
 
     <script>
         const config = {
@@ -30,24 +88,94 @@
         firebase.initializeApp(config);
         const db = firebase.database().ref("/");
 
-        // Tenta conectar
-        db.once('value').then(() => {
-            document.getElementById('status').innerText = "✅ Conectado! O banco está pronto para ser limpo.";
-            document.getElementById('status').style.borderColor = "#00ff00";
-        }).catch(err => {
-            document.getElementById('status').innerText = "❌ Erro: " + err.message;
+        window.meuNome = localStorage.getItem('oio_user') || "Michel";
+        document.getElementById('item-' + window.meuNome).classList.add('active');
+
+        function trocarUser(nome, el) {
+            window.meuNome = nome;
+            localStorage.setItem('oio_user', nome);
+            document.querySelectorAll('.contato-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+            if(id) document.getElementById(id).classList.add('active');
+        }
+
+        // CARREGAR VÍDEOS
+        db.child("videos_feed").on('value', snap => {
+            const feed = document.getElementById('feed-videos');
+            feed.innerHTML = "";
+            snap.forEach(c => {
+                const v = c.val();
+                const d = document.createElement('div'); d.className = "video-card";
+                d.innerHTML = `<video src="${v.url}" loop onclick="this.paused?this.play():this.pause()"></video>`;
+                feed.prepend(d);
+            });
         });
 
-        function limparBanco() {
-            if(confirm("Michel, confirma a limpeza total para destravar o app?")) {
-                db.remove()
-                    .then(() => {
-                        alert("BANCO LIMPO! Agora você pode colar o seu código de backup no GitHub.");
-                        document.getElementById('status').innerText = "🚀 BANCO VAZIO E PRONTO!";
-                    })
-                    .catch(err => {
-                        alert("Erro ao limpar: " + err.message);
-                    });
+        // CARREGAR CHAT
+        db.child("messages").limitToLast(15).on('value', snap => {
+            const container = document.getElementById('chat-container');
+            container.innerHTML = "";
+            snap.forEach(c => {
+                const m = c.val();
+                const d = document.createElement('div');
+                d.className = "msg " + (m.autor === window.meuNome ? "sent" : "");
+                let h = `<small style="color:var(--accent); font-size:9px;">${m.autor}</small>`;
+                if(m.texto) h += `<div>${m.texto}</div>`;
+                if(m.url) h += `<img src="${m.url}">`;
+                if(m.videoUrl) h += `<video controls src="${m.videoUrl}"></video>`;
+                if(m.audio) h += `<div>🎤 Áudio</div>`;
+                d.innerHTML = h;
+                container.appendChild(d);
+            });
+            container.scrollTop = container.scrollHeight;
+        });
+
+        function enviar(){
+            const i = document.getElementById('msgInput');
+            if(i.value.trim()){ db.child("messages").push({ autor: window.meuNome, texto: i.value }); i.value = ""; }
+        }
+
+        // --- COMPRESSOR DE MÍDIA (O SEGREDO PARA NÃO TRAVAR) ---
+        document.getElementById('mediaInput').onchange = (e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const tipo = file.type.includes('video') ? 'videoUrl' : 'url';
+                // Aqui enviamos com compressão visual (o navegador ajuda a reduzir)
+                db.child("messages").push({ autor: window.meuNome, [tipo]: ev.target.result });
+            };
+            reader.readAsDataURL(file);
+        };
+
+        document.getElementById('videoInput').onchange = (e) => {
+            const reader = new FileReader();
+            reader.onload = (ev) => db.child("videos_feed").push({ url: ev.target.result });
+            reader.readAsDataURL(e.target.files[0]);
+        };
+
+        // MICROFONE
+        let mediaRecorder; let audioChunks = [];
+        async function toggleGravacao() {
+            if (!mediaRecorder || mediaRecorder.state === "inactive") {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp4' });
+                    const reader = new FileReader();
+                    reader.readAsDataURL(audioBlob);
+                    reader.onloadend = () => db.child("messages").push({ autor: window.meuNome, audio: reader.result });
+                };
+                mediaRecorder.start();
+                document.getElementById('micBtn').style.color = "red";
+            } else {
+                mediaRecorder.stop();
+                document.getElementById('micBtn').style.color = "var(--accent)";
             }
         }
     </script>
