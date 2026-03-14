@@ -3,45 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OIO ONE - PROFISSIONAL</title>
+    <title>OIO ONE - SOM REAL</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        :root { --accent: #00e5ff; --notify: #ff007f; }
+        :root { --accent: #00e5ff; }
         * { margin:0; padding:0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body, html { background:#000; height:100vh; width:100vw; overflow:hidden; position:fixed; font-family: sans-serif; color: #fff; }
-        video#bg-video { position:absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: 1; filter: brightness(0.4); transition: 0.5s; }
+        video#bg-video { position:absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: 1; filter: brightness(0.4); }
 
-        /* NOTIFICAÇÃO VISUAL (PISCAR TELA) */
-        @keyframes flash { 0% { box-shadow: inset 0 0 50px var(--accent); } 100% { box-shadow: inset 0 0 0px transparent; } }
-        .notificar { animation: flash 1s ease-out; }
+        /* NOTIFICAÇÃO */
+        @keyframes flash { 0% { background: rgba(0,229,255,0.4); } 100% { background: transparent; } }
+        .notificar { animation: flash 0.8s ease-out; }
 
-        /* LISTA DE CONTATOS (SALTO QUÂNTICO) */
+        /* SALTO QUÂNTICO TOPO */
         #contatos-topo { position: absolute; top: 15px; left: 0; width: 100%; z-index: 500; display: flex; gap: 15px; padding: 10px 20px; overflow-x: auto; }
-        .contato-item { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.5; transition: 0.3s; }
+        .contato-item { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.5; }
         .contato-item.active { opacity: 1; transform: scale(1.1); }
-        .contato-photo { width: 48px; height: 48px; border-radius: 50%; border: 2px solid #fff; background-size: cover; background-position: center; background-color: #222; }
+        .contato-photo { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #fff; background-color: #222; background-size: cover; }
         .contato-item.active .contato-photo { border-color: var(--accent); box-shadow: 0 0 15px var(--accent); }
-        .contato-name { font-size: 10px; font-weight: bold; }
 
         /* CHAT */
-        section { display:none; position:fixed; inset:0; z-index:1000; flex-direction:column; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); }
+        section { display:none; position:fixed; inset:0; z-index:1000; flex-direction:column; background: rgba(0,0,0,0.8); backdrop-filter: blur(25px); }
         section.active { display:flex; }
-        #chat-container { flex:1; overflow-y:auto; padding: 110px 20px 20px; display:flex; flex-direction:column; gap:12px; }
+        #chat-container { flex:1; overflow-y:auto; padding: 110px 20px 20px; display:flex; flex-direction:column; gap:15px; }
         
-        .msg { padding:12px; border-radius:18px; max-width:85%; background:rgba(255,255,255,0.1); border: 1px solid rgba(0,229,255,0.1); }
-        .msg.sent { align-self: flex-end; background: #0066ff; border:none; }
-        
-        /* CORREÇÃO AUDIO CHROME */
-        audio { width: 100%; height: 35px; margin-top: 8px; border-radius: 20px; }
-        .msg audio { filter: invert(1) hue-rotate(180deg); }
+        .msg { padding:12px 18px; border-radius:20px; max-width:80%; background:rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.05); }
+        .msg.sent { align-self: flex-end; background: #0066ff; border:none; box-shadow: 0 4px 15px rgba(0,102,255,0.3); }
 
-        /* CONTROLES */
+        /* PLAYER OIO CUSTOMIZADO (ADEUS TRÊS PONTINHOS) */
+        .oio-audio-player { display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.3); padding: 8px 15px; border-radius: 30px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1); width: 180px; }
+        .play-btn { font-size: 20px; color: var(--accent); cursor: pointer; }
+
         .controles { display:flex; gap:18px; padding:15px 20px; background:#000; align-items:center; border-top: 1px solid #222; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
         .controles input { flex:1; padding:12px 18px; border-radius:25px; border:none; background:#1a1a1a; color:#fff; outline:none; }
-        .btn-vibe { color:var(--accent); font-size: 24px; cursor:pointer; }
-        
+        .btn-vibe { color:var(--accent); font-size: 24px; }
         .btn-main { position:absolute; right:20px; bottom:110px; width:65px; height:65px; border-radius:50%; background:var(--accent); color:#000; font-size:30px; border:none; z-index:1500; display:flex; align-items:center; justify-content:center; }
     </style>
 </head>
@@ -50,11 +47,11 @@
     <div id="contatos-topo">
         <div class="contato-item active" onclick="trocarUser('Michel', '', this)">
             <div class="contato-photo" style="background-image: url('https://via.placeholder.com/150/00e5ff?text=M')"></div>
-            <span class="contato-name">Michel</span>
+            <span style="font-size:10px">Michel</span>
         </div>
         <div class="contato-item" onclick="trocarUser('Gabriela', '', this)">
             <div class="contato-photo" style="background-image: url('https://via.placeholder.com/150/ff007f?text=G')"></div>
-            <span class="contato-name">Gabriela</span>
+            <span style="font-size:10px">Gabriela</span>
         </div>
     </div>
 
@@ -63,7 +60,7 @@
     <section id="chat-page">
         <div id="chat-container"></div>
         <div class="controles">
-            <i class="fa-solid fa-camera btn-vibe" onclick="abrirCamera()"></i>
+            <i class="fa-solid fa-camera btn-vibe" onclick="document.getElementById('fotoInput').click()"></i>
             <i id="micBtn" class="fa-solid fa-microphone btn-vibe" onclick="toggleGravacao()"></i>
             <input id="msgInput" placeholder="Sua vibe...">
             <i class="fa-solid fa-paper-plane btn-vibe" onclick="enviar()"></i>
@@ -72,7 +69,6 @@
     </section>
 
     <button class="btn-main" onclick="showPage('chat-page')"><i class="fa-solid fa-comment"></i></button>
-
     <input type="file" id="fotoInput" accept="image/*" capture="camera" style="display:none">
 
     <script>
@@ -83,17 +79,14 @@
         };
         firebase.initializeApp(config);
         const db = firebase.database().ref("/");
-
         window.meuNome = "Michel";
 
         function trocarUser(nome, foto, el) {
             window.meuNome = nome;
             document.querySelectorAll('.contato-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
-            if(navigator.vibrate) navigator.vibrate(40);
         }
 
-        // --- CORREÇÃO DO ÁUDIO ---
         let mediaRecorder;
         let audioChunks = [];
         async function toggleGravacao() {
@@ -104,7 +97,7 @@
                 audioChunks = [];
                 mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
                 mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); // WebM é melhor para Chrome/Firefox
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
                     const reader = new FileReader();
                     reader.readAsDataURL(audioBlob);
                     reader.onloadend = () => {
@@ -113,13 +106,20 @@
                 };
                 mediaRecorder.start();
                 micBtn.style.color = "red";
+                if(navigator.vibrate) navigator.vibrate(50);
             } else {
                 mediaRecorder.stop();
                 micBtn.style.color = "var(--accent)";
             }
         }
 
-        function abrirCamera() { document.getElementById('fotoInput').click(); }
+        // FUNÇÃO PARA DAR PLAY NO ÁUDIO CUSTOMIZADO
+        function playAudio(btn, audioBase64) {
+            const audio = new Audio(audioBase64);
+            audio.play();
+            btn.classList.replace('fa-play', 'fa-volume-high');
+            audio.onended = () => btn.classList.replace('fa-volume-high', 'fa-play');
+        }
 
         function enviar(){
             const input = document.getElementById('msgInput');
@@ -134,25 +134,29 @@
             if(id) document.getElementById(id).classList.add('active');
         }
 
-        // --- NOTIFICAÇÃO E MENSAGENS ---
         db.child("messages").limitToLast(1).on('child_added', snap => {
             const m = snap.val();
-            // Notificar visualmente se a mensagem for nova
             if(m.autor !== window.meuNome) {
                 document.body.classList.add('notificar');
-                setTimeout(() => document.body.classList.remove('notificar'), 1000);
-                if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                setTimeout(() => document.body.classList.remove('notificar'), 800);
             }
-
             const container = document.getElementById('chat-container');
             const d = document.createElement('div');
             d.className = "msg " + (m.autor === window.meuNome ? "sent" : "");
             
-            let html = `<small>${m.autor}</small>`;
+            let html = `<small style="font-size:9px; opacity:0.7;">${m.autor}</small>`;
             if(m.texto) html += `<div>${m.texto}</div>`;
-            // Atributo 'preload' ajuda o Chrome a carregar o áudio sem pedir download
-            if(m.audio) html += `<audio controls preload="auto" src="${m.audio}"></audio>`;
+            if(m.url) html += `<img src="${m.url}" style="width:100%; border-radius:10px; margin-top:5px;">`;
             
+            // NOVO PLAYER CUSTOMIZADO
+            if(m.audio) {
+                html += `
+                <div class="oio-audio-player">
+                    <i class="fa-solid fa-play play-btn" onclick="playAudio(this, '${m.audio}')"></i>
+                    <span style="font-size:12px; opacity:0.8;">Voz OIO ONE</span>
+                </div>`;
+            }
+
             d.innerHTML = html;
             container.appendChild(d);
             container.scrollTop = container.scrollHeight;
