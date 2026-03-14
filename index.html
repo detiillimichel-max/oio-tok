@@ -3,76 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OIO ONE - BLINDADO</title>
+    <title>OIO ONE - MULTIMÍDIA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        :root { --accent: #00e5ff; --love: #ff0055; --glass: rgba(255, 255, 255, 0.1); }
+        :root { --accent: #00e5ff; --glass: rgba(255, 255, 255, 0.1); }
         * { margin:0; padding:0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body, html { background:#000; height:100vh; width:100vw; overflow:hidden; position:fixed; font-family: sans-serif; color: #fff; }
         video#bg-video { position:absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: 1; filter: brightness(0.4); }
 
-        /* ANIMAÇÃO ESTRELAS */
-        .star-effect { position: fixed; pointer-events: none; z-index: 2000; font-size: 20px; animation: fall 1.5s linear forwards; }
-        @keyframes fall { 0% { transform: translateY(-10vh); opacity: 1; } 100% { transform: translateY(100vh); opacity: 0; } }
+        /* NOTIFICAÇÃO PISCANTE */
+        @keyframes flash { 0% { box-shadow: inset 0 0 40px var(--accent); } 100% { box-shadow: inset 0 0 0px transparent; } }
+        .notificar { animation: flash 0.8s ease-out; }
 
         /* TOPO SALTO QUÂNTICO */
         #contatos-topo { position: absolute; top: 15px; left: 0; width: 100%; z-index: 500; display: flex; gap: 15px; padding: 10px 20px; overflow-x: auto; }
-        .contato-item { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.4; transition: 0.4s; }
+        .contato-item { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.5; }
         .contato-item.active { opacity: 1; transform: scale(1.1); }
-        .contato-photo { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #fff; background-size: cover; background-position: center; }
+        .contato-photo { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #fff; background-color: #222; background-size: cover; background-position: center; }
         .contato-item.active .contato-photo { border-color: var(--accent); box-shadow: 0 0 15px var(--accent); }
 
-        /* SEÇÕES */
-        section { display:none; position:fixed; inset:0; z-index:1000; flex-direction:column; background: #000; }
+        /* BOTÃO + (ABRE ÁREA DE VÍDEOS) */
+        .btn-add-media { position: absolute; top: 20px; right: 20px; z-index: 600; font-size: 28px; color: var(--accent); cursor: pointer; }
+
+        /* SEÇÕES (CHAT E VÍDEOS) */
+        section { display:none; position:fixed; inset:0; z-index:1000; flex-direction:column; background: rgba(0,0,0,0.85); backdrop-filter: blur(25px); }
         section.active { display:flex; }
-        
-        /* FEED */
-        #feed-videos { overflow-y: auto; padding: 110px 15px 150px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        #feed-videos.tiktok-mode { display: block; padding: 0; scroll-snap-type: y mandatory; }
-        .video-card { width: 100%; aspect-ratio: 9/16; background: #111; border-radius: 20px; overflow: hidden; position: relative; }
-        #feed-videos.tiktok-mode .video-card { height: 100vh; width: 100vw; border-radius: 0; scroll-snap-align: start; }
+
+        /* ÁREA DE VÍDEOS (FEED) */
+        #feed-videos { overflow-y: auto; padding: 100px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .video-card { width: 100%; aspect-ratio: 9/16; background: #111; border-radius: 15px; overflow: hidden; border: 1px solid var(--glass); }
         .video-card video { width: 100%; height: 100%; object-fit: cover; }
 
-        /* LIKES */
-        .like-box { position: absolute; bottom: 15px; right: 15px; display: flex; flex-direction: column; align-items: center; z-index: 10; }
-        .btn-heart { font-size: 26px; color: #fff; cursor: pointer; }
-        .btn-heart.liked { color: var(--love); }
-
         /* CHAT */
-        #chat-page { background: rgba(0,0,0,0.85); backdrop-filter: blur(25px); }
         #chat-container { flex:1; overflow-y:auto; padding: 120px 20px 20px; display:flex; flex-direction:column; gap:12px; }
-        .msg { padding:14px; border-radius:20px; max-width:85%; background:rgba(255,255,255,0.08); }
-        .msg.sent { align-self: flex-end; background: #0066ff; }
+        .msg { padding:12px; border-radius:18px; max-width:85%; background:rgba(255,255,255,0.1); border: 1px solid rgba(0,229,255,0.1); }
+        .msg.sent { align-self: flex-end; background: #0066ff; border:none; box-shadow: 0 5px 15px rgba(0,102,255,0.3); }
+        .msg img, .msg video { width: 100%; border-radius: 12px; margin-top: 5px; }
 
-        .controles { display:flex; gap:15px; padding:15px 20px; background:#000; align-items:center; border-top: 1px solid #222; }
-        .controles input { flex:1; padding:12px 20px; border-radius:30px; border:none; background:#1a1a1a; color:#fff; outline:none; }
-        .btn-vibe { color:var(--accent); font-size: 24px; }
-        .btn-main { position:absolute; right:25px; bottom:120px; width:60px; height:60px; border-radius:50%; background:var(--accent); color:#000; font-size:28px; border:none; z-index:1500; display:flex; align-items:center; justify-content:center; }
+        /* PLAYER DE ÁUDIO OIO */
+        .oio-audio-player { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 30px; margin-top: 5px; }
+        .play-btn { color: var(--accent); font-size: 20px; }
+
+        /* CONTROLES */
+        .controles { display:flex; gap:18px; padding:15px 20px; background:#000; align-items:center; border-top: 1px solid #222; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
+        .controles input { flex:1; padding:12px 18px; border-radius:25px; border:none; background:#1a1a1a; color:#fff; outline:none; }
+        .btn-vibe { color:var(--accent); font-size: 24px; cursor:pointer; }
+        .btn-main { position:absolute; right:20px; bottom:110px; width:65px; height:65px; border-radius:50%; background:var(--accent); color:#000; font-size:30px; border:none; z-index:1500; display:flex; align-items:center; justify-content:center; }
     </style>
 </head>
-<body>
+<body id="mainBody">
 
     <div id="contatos-topo">
-        <div class="contato-item" id="item-Michel" onclick="trocarUser('Michel', this)">
+        <div class="contato-item active" onclick="trocarUser('Michel', this)">
             <div class="contato-photo" style="background-image: url('https://github.com/MichelDetilli.png')"></div>
             <span style="font-size:10px">Michel</span>
         </div>
-        <div class="contato-item" id="item-Gabriela" onclick="trocarUser('Gabriela', this)">
+        <div class="contato-item" onclick="trocarUser('Gabriela', this)">
             <div class="contato-photo" style="background-image: url('https://via.placeholder.com/150/ff007f?text=G')"></div>
             <span style="font-size:10px">Gabriela</span>
         </div>
     </div>
 
-    <i class="fa-solid fa-circle-plus" style="position:absolute; top:20px; right:20px; z-index:600; font-size:28px; color:var(--accent);" onclick="showPage('videos-page')"></i>
+    <i class="fa-solid fa-circle-plus btn-add-media" onclick="showPage('videos-page')"></i>
+
     <video id="bg-video" loop playsinline autoplay muted></video>
 
     <section id="videos-page">
-        <i class="fa-solid fa-table-cells" style="position:absolute; top:70px; right:20px; z-index:600; font-size:24px;" onclick="document.getElementById('feed-videos').classList.toggle('tiktok-mode')"></i>
+        <h2 style="text-align:center; margin-top:80px; color:var(--accent);">FEED DE VÍDEOS</h2>
         <div id="feed-videos"></div>
-        <button style="position:fixed; bottom:30px; left:50%; transform:translateX(-50%); padding:15px 30px; border-radius:30px; background:var(--accent); border:none; font-weight:bold; z-index:1100;" onclick="document.getElementById('videoInput').click()">NOVO VÍDEO</button>
-        <button onclick="showPage('')" style="position:fixed; bottom:5px; left:50%; transform:translateX(-50%); color:#fff; background:none; border:none; font-size:12px; z-index:1100;">VOLTAR</button>
+        <button onclick="document.getElementById('videoInput').click()" style="margin: 20px; padding: 15px; border-radius: 30px; border: none; background: var(--accent); font-weight: bold;">SUBIR NOVO VÍDEO</button>
+        <button onclick="showPage('')" style="color:#fff; background:none; border:none;">VOLTAR</button>
     </section>
 
     <section id="chat-page">
@@ -83,10 +85,10 @@
             <input id="msgInput" placeholder="Sua vibe...">
             <i class="fa-solid fa-paper-plane btn-vibe" onclick="enviar()"></i>
         </div>
-        <button onclick="showPage('')" style="position:absolute; top:35px; right:25px; color:#fff; background:none; border:none; font-size:26px;">✕</button>
+        <button onclick="showPage('')" style="position:absolute; top:30px; right:25px; color:#fff; background:none; border:none; font-size:24px;">✕</button>
     </section>
 
-    <button class="btn-main" onclick="showPage('chat-page')" id="mainBtn"><i class="fa-solid fa-comment"></i></button>
+    <button class="btn-main" onclick="showPage('chat-page')"><i class="fa-solid fa-comment"></i></button>
 
     <input type="file" id="mediaInput" accept="image/*,video/*" style="display:none">
     <input type="file" id="videoInput" accept="video/*" style="display:none">
@@ -99,79 +101,115 @@
         };
         firebase.initializeApp(config);
         const db = firebase.database().ref("/");
+        window.meuNome = "Michel";
 
-        // MEMÓRIA OIO: Recupera usuário salvo
-        window.meuNome = localStorage.getItem('oio_user') || "Michel";
-        document.getElementById('item-' + window.meuNome).classList.add('active');
+        const somEnvio = new Audio('https://www.soundjay.com/communication/sounds/digital-transmission-1.mp3');
 
         function trocarUser(nome, el) {
             window.meuNome = nome;
-            localStorage.setItem('oio_user', nome);
             document.querySelectorAll('.contato-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
         }
 
-        // LIMPAR MENSAGENS (Segure o botão por 2s)
-        let timer;
-        document.getElementById('mainBtn').ontouchstart = () => timer = setTimeout(() => { if(confirm("Limpar mensagens?")) db.child("messages").remove(); }, 2000);
-        document.getElementById('mainBtn').ontouchend = () => clearTimeout(timer);
-
-        function curtir(id, btn) {
-            db.child("videos_feed").child(id).child("likes").transaction(c => {
-                const n = (c || 0) + 1;
-                if(n % 5 === 0) for(let i=0; i<15; i++) {
-                    const s = document.createElement('div'); s.className='star-effect'; s.innerHTML='✨';
-                    s.style.left = Math.random()*100+'vw'; s.style.top = '-5vh';
-                    document.body.appendChild(s); setTimeout(()=>s.remove(), 1500);
-                }
-                return n;
-            });
-            btn.classList.add('liked');
+        // --- ÁUDIO OIO ---
+        let mediaRecorder;
+        let audioChunks = [];
+        async function toggleGravacao() {
+            const micBtn = document.getElementById('micBtn');
+            if (!mediaRecorder || mediaRecorder.state === "inactive") {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp4' });
+                    const reader = new FileReader();
+                    reader.readAsDataURL(audioBlob);
+                    reader.onloadend = () => {
+                        db.child("messages").push({ autor: window.meuNome, audio: reader.result });
+                        somEnvio.play();
+                    };
+                };
+                mediaRecorder.start();
+                micBtn.style.color = "red";
+            } else {
+                mediaRecorder.stop();
+                micBtn.style.color = "var(--accent)";
+            }
         }
+
+        function playAudio(btn, src) {
+            const a = new Audio(src);
+            a.play();
+            btn.classList.replace('fa-play', 'fa-volume-high');
+            a.onended = () => btn.classList.replace('fa-volume-high', 'fa-play');
+        }
+
+        // --- ENVIAR MENSAGEM ---
+        function enviar(){
+            const input = document.getElementById('msgInput');
+            if(input.value.trim()){
+                db.child("messages").push({ autor: window.meuNome, texto: input.value });
+                somEnvio.play();
+                input.value = "";
+            }
+        }
+
+        // --- SUBIR FOTO OU VÍDEO NO CHAT ---
+        document.getElementById('mediaInput').onchange = function(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const tipo = file.type.includes('video') ? 'videoUrl' : 'url';
+                db.child("messages").push({ autor: window.meuNome, [tipo]: ev.target.result });
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // --- SUBIR VÍDEO NO FEED (+) ---
+        document.getElementById('videoInput').onchange = function(e) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                db.child("videos_feed").push({ url: ev.target.result, autor: window.meuNome });
+                alert("Vídeo subiu para o Feed!");
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        };
 
         function showPage(id) {
             document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
             if(id) document.getElementById(id).classList.add('active');
         }
 
-        // FEED ATUALIZADO
-        db.child("videos_feed").on('value', snap => {
-            const feed = document.getElementById('feed-videos');
-            feed.innerHTML = "";
-            snap.forEach(c => {
-                const v = c.val();
-                const d = document.createElement('div'); d.className = "video-card";
-                d.innerHTML = `<video src="${v.url}" loop onclick="this.paused?this.play():this.pause()"></video>
-                    <div class="like-box"><i class="fa-solid fa-heart btn-heart" onclick="curtir('${c.key}', this)"></i><span style="font-size:10px">${v.likes||0}</span></div>`;
-                feed.prepend(d);
-            });
-        });
-
-        // CHAT ATUALIZADO
-        db.child("messages").limitToLast(15).on('value', snap => {
+        // --- ESCUTAR MENSAGENS ---
+        db.child("messages").limitToLast(15).on('child_added', snap => {
+            const m = snap.val();
+            if(m.autor !== window.meuNome) {
+                document.body.classList.add('notificar');
+                setTimeout(() => document.body.classList.remove('notificar'), 800);
+            }
             const container = document.getElementById('chat-container');
-            container.innerHTML = "";
-            snap.forEach(c => {
-                const m = c.val();
-                const d = document.createElement('div');
-                d.className = "msg " + (m.autor === window.meuNome ? "sent" : "");
-                d.innerHTML = `<small style="color:var(--accent); font-size:9px;">${m.autor}</small><div>${m.texto || (m.audio?'🎤 Áudio':'🖼️ Mídia')}</div>`;
-                container.appendChild(d);
-            });
+            const d = document.createElement('div');
+            d.className = "msg " + (m.autor === window.meuNome ? "sent" : "");
+            let h = `<small>${m.autor}</small>`;
+            if(m.texto) h += `<div>${m.texto}</div>`;
+            if(m.url) h += `<img src="${m.url}">`;
+            if(m.videoUrl) h += `<video controls src="${m.videoUrl}"></video>`;
+            if(m.audio) h += `<div class="oio-audio-player"><i class="fa-solid fa-play play-btn" onclick="playAudio(this, '${m.audio}')"></i><span>Áudio</span></div>`;
+            d.innerHTML = h;
+            container.appendChild(d);
             container.scrollTop = container.scrollHeight;
         });
 
-        // ENVIO
-        function enviar(){
-            const i = document.getElementById('msgInput');
-            if(i.value.trim()){ db.child("messages").push({ autor: window.meuNome, texto: i.value }); i.value = ""; }
-        }
-
-        document.getElementById('videoInput').onchange = (e) => {
-            const r = new FileReader();
-            r.onload = (ev) => db.child("videos_feed").push({ url: ev.target.result, likes: 0 });
-            r.readAsDataURL(e.target.files[0]);
-        };
+        // --- ESCUTAR FEED DE VÍDEOS ---
+        db.child("videos_feed").on('child_added', snap => {
+            const v = snap.val();
+            const feed = document.getElementById('feed-videos');
+            const card = document.createElement('div');
+            card.className = "video-card";
+            card.innerHTML = `<video src="${v.url}" loop onclick="this.paused ? this.play() : this.pause()"></video>`;
+            feed.prepend(card);
+        });
     </script>
 </body>
 </html>
