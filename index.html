@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OIO ONE - LIVE</title>
+    <title>OIO ONE - SALTO QUÂNTICO</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
@@ -11,24 +11,28 @@
         :root { --accent: #00e5ff; --glass: rgba(255, 255, 255, 0.1); }
         * { margin:0; padding:0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body, html { background:#000; height:100vh; width:100vw; overflow:hidden; position:fixed; font-family: sans-serif; color: #fff; }
-        video#bg-video { position:absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: 1; filter: brightness(0.6); }
+        video#bg-video { position:absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: 1; filter: brightness(0.5); }
 
-        /* HEADER */
-        #userHeader { position: absolute; top: 20px; left: 20px; z-index: 500; display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 30px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
-        .user-mini-photo { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--accent); background-size: cover; background-position: center; }
+        /* SALTO QUÂNTICO: LISTA DE CONTATOS NO TOPO */
+        #contatos-topo { position: absolute; top: 15px; left: 0; width: 100%; z-index: 500; display: flex; gap: 15px; padding: 10px 20px; overflow-x: auto; scroll-behavior: smooth; }
+        .contato-item { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.6; transition: 0.3s; }
+        .contato-item.active { opacity: 1; transform: scale(1.1); }
+        .contato-photo { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #fff; background: var(--glass); background-size: cover; background-position: center; }
+        .contato-item.active .contato-photo { border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+        .contato-name { font-size: 10px; font-weight: bold; text-transform: uppercase; }
 
         /* CHAT */
-        section { display:none; position:fixed; inset:0; z-index:1000; flex-direction:column; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); transition: 0.4s; }
+        section { display:none; position:fixed; inset:0; z-index:1000; flex-direction:column; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); }
         section.active { display:flex; }
-        #chat-container { flex:1; overflow-y:auto; padding: 100px 20px 20px; display:flex; flex-direction:column; gap:12px; }
+        #chat-container { flex:1; overflow-y:auto; padding: 110px 20px 20px; display:flex; flex-direction:column; gap:12px; }
         
-        .msg { padding:12px; border-radius:18px; max-width:85%; background:rgba(255,255,255,0.1); border: 1px solid rgba(0,229,255,0.15); }
+        .msg { padding:12px; border-radius:18px; max-width:85%; background:rgba(255,255,255,0.1); border: 1px solid rgba(0,229,255,0.15); position: relative; }
         .msg.sent { align-self: flex-end; background: #0066ff; border:none; }
         .msg audio { width: 100%; height: 35px; margin-top: 5px; filter: invert(1); }
-        .msg img { max-width: 100%; border-radius: 12px; margin-top: 5px; }
+        .msg small { font-size: 9px; color: var(--accent); display: block; margin-bottom: 4px; }
 
         /* CONTROLES */
-        .controles { display:flex; gap:18px; padding:15px 20px; background:rgba(10,10,10,0.98); align-items:center; border-top: 1px solid #222; }
+        .controles { display:flex; gap:18px; padding:15px 20px; background:rgba(10,10,10,0.98); align-items:center; border-top: 1px solid #222; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
         .controles input { flex:1; padding:12px 18px; border-radius:25px; border:none; background:#1a1a1a; color:#fff; outline:none; }
         .btn-vibe { color:var(--accent); font-size: 24px; cursor:pointer; }
         
@@ -37,9 +41,15 @@
 </head>
 <body>
 
-    <div id="userHeader">
-        <div class="user-mini-photo" id="miniPhoto"></div>
-        <span id="userNameTop">Michel</span>
+    <div id="contatos-topo">
+        <div class="contato-item active" onclick="trocarUser('Michel', 'https://via.placeholder.com/150/00e5ff', this)">
+            <div class="contato-photo" style="background-image: url('https://via.placeholder.com/150/00e5ff')"></div>
+            <span class="contato-name">Michel</span>
+        </div>
+        <div class="contato-item" onclick="trocarUser('Gabriela', 'https://via.placeholder.com/150/ff007f', this)">
+            <div class="contato-photo" style="background-image: url('https://via.placeholder.com/150/ff007f')"></div>
+            <span class="contato-name">Gabriela</span>
+        </div>
     </div>
 
     <video id="bg-video" loop playsinline autoplay muted></video>
@@ -68,10 +78,19 @@
         firebase.initializeApp(config);
         const db = firebase.database().ref("/");
 
-        // --- LÓGICA DE ÁUDIO ---
+        window.meuNome = "Michel"; // Nome padrão inicial
+
+        // FUNÇÃO PARA TROCAR DE USUÁRIO (SALTO)
+        function trocarUser(nome, foto, el) {
+            window.meuNome = nome;
+            document.querySelectorAll('.contato-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            if(navigator.vibrate) navigator.vibrate(50);
+        }
+
+        // LÓGICA DE ÁUDIO
         let mediaRecorder;
         let audioChunks = [];
-
         async function toggleGravacao() {
             const micBtn = document.getElementById('micBtn');
             if (!mediaRecorder || mediaRecorder.state === "inactive") {
@@ -84,7 +103,7 @@
                     const reader = new FileReader();
                     reader.readAsDataURL(audioBlob);
                     reader.onloadend = () => {
-                        db.child("messages").push({ autor: window.meuNome || "Michel", audio: reader.result });
+                        db.child("messages").push({ autor: window.meuNome, audio: reader.result });
                     };
                 };
                 mediaRecorder.start();
@@ -100,17 +119,23 @@
         function enviar(){
             const input = document.getElementById('msgInput');
             if(input.value.trim()){
-                db.child("messages").push({ autor: window.meuNome || "Michel", texto: input.value });
+                db.child("messages").push({ autor: window.meuNome, texto: input.value });
                 input.value = "";
             }
         }
+
+        document.getElementById('fotoInput').onchange = function(e) {
+            const reader = new FileReader();
+            reader.onload = (ev) => { db.child("messages").push({ autor: window.meuNome, url: ev.target.result }); };
+            reader.readAsDataURL(e.target.files[0]);
+        };
 
         function showPage(id) {
             document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
             if(id) document.getElementById(id).classList.add('active');
         }
 
-        // --- MOSTRAR MENSAGENS (COM PLAYER DE ÁUDIO) ---
+        // MOSTRAR MENSAGENS ATUALIZADAS
         db.child("messages").limitToLast(20).on('child_added', snap => {
             const m = snap.val();
             const container = document.getElementById('chat-container');
@@ -119,6 +144,7 @@
             
             let html = `<small>${m.autor}</small>`;
             if(m.texto) html += `<div>${m.texto}</div>`;
+            if(m.url) html += `<img src="${m.url}" style="width:100%; border-radius:10px;">`;
             if(m.audio) html += `<audio controls src="${m.audio}"></audio>`;
             
             d.innerHTML = html;
